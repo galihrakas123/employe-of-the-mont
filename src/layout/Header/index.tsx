@@ -1,132 +1,60 @@
 import React from 'react';
-import { Calendar, Bell, ChevronDown, Layers } from 'lucide-react';
+import { Calendar, Menu } from 'lucide-react';
+import { useSidebar } from '../SidebarContext';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import avatarImg from '@/assets/avatar.png';
 
 export const Header: React.FC = () => {
+  const { togglePin, isPinned } = useSidebar();
+
   return (
-    <header
-      style={{
-        height: '68px',
-        background: '#ffffff',
-        borderBottom: '1px solid #e2e8f0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 28px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 30,
-      }}
-    >
-      {/* Brand Title matching Screenshot */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div
-          style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '8px',
-            background: '#16a34a',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 6px rgba(22, 163, 74, 0.3)',
-          }}
+    <header className="h-16 bg-white border-b border-[#E0E0E0] flex items-center justify-between px-6 sticky top-0 z-40 select-none font-roboto">
+      {/* 1. Left: Hamburger Toggle */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={togglePin}
+          title={isPinned ? 'Tutup / Ciutkan Sidebar' : 'Buka & Kunci Sidebar'}
+          className="w-10 h-10 rounded-lg hover:bg-[#F5F5F5] hover:text-[#00875A] flex items-center justify-center text-[#212121] transition"
         >
-          <Layers size={22} />
-        </div>
-        <div>
-          <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-            Dashboard Kinerja Strategis
-          </div>
-          <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, letterSpacing: '0.04em' }}>
-            BAPENDA PROVINSI JAWA BARAT
-          </div>
-        </div>
+          <Menu size={22} />
+        </button>
       </div>
 
-      {/* Right Controls matching Screenshot */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      {/* 2. Right: Theme Toggle, Periode, Profil */}
+      <div className="flex items-center gap-3.5">
+        {/* Switch Dark Mode / Light Mode sesuai Desain Referensi */}
+        <ThemeToggle />
+
         {/* Periode Badge */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: '#f8fafc',
-            border: '1px solid #cbd5e1',
-            borderRadius: '999px',
-            padding: '5px 14px',
-            fontSize: '0.78rem',
-            color: '#334155',
-            fontWeight: 500,
-          }}
-        >
-          <Calendar size={14} color="#64748b" />
-          <span>Periode: <strong>Oktober 2026</strong></span>
+        <div className="hidden sm:flex items-center gap-2 bg-[#F5F5F5] border border-[#E0E0E0] rounded-lg px-3.5 py-1.5 text-[12px] text-[#424242] font-medium">
+          <Calendar size={14} className="text-[#00875A]" />
+          <span>
+            Periode: <strong className="text-[#212121] font-semibold">Oktober 2026</strong>
+          </span>
         </div>
 
-        {/* Notification Bell */}
-        <button
-          style={{
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '50%',
-            width: '36px',
-            height: '36px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: '#475569',
-            position: 'relative',
-          }}
-          title="Notifikasi"
-        >
-          <Bell size={16} />
-          <span
-            style={{
-              position: 'absolute',
-              top: '7px',
-              right: '7px',
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: '#ef4444',
-            }}
-          />
-        </button>
-
-        {/* HR Admin SDM Profile Dropdown */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            padding: '4px 8px',
-            borderRadius: '8px',
-          }}
-        >
-          <div
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: '#e0e7ff',
-              color: '#4338ca',
-              fontWeight: 800,
-              fontSize: '0.78rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            HR
+        {/* User Profile Pill (Fadli Rosyid / Admin dengan Foto Profil Baru) */}
+        <div className="flex items-center gap-3 pl-3 border-l border-[#E0E0E0] cursor-pointer hover:opacity-85 transition">
+          <div className="w-10 h-10 rounded-xl bg-[#374151] flex items-center justify-center shadow-sm overflow-hidden border border-[#E0E0E0] shrink-0">
+            <img
+              src={avatarImg}
+              alt="Avatar Fadli Rosyid"
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                // Fallback to text initials if image fails
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+            <span className="text-[11px] text-white font-bold hidden">FR</span>
           </div>
-          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>
-            Admin SDM
-          </span>
-          <ChevronDown size={14} color="#64748b" />
+          <div className="hidden sm:block text-left">
+            <div className="text-[13px] font-semibold text-[#212121] leading-tight font-roboto">
+              Fadli Rosyid
+            </div>
+            <div className="text-[11px] text-[#757575] font-normal font-roboto">
+              Admin
+            </div>
+          </div>
         </div>
       </div>
     </header>

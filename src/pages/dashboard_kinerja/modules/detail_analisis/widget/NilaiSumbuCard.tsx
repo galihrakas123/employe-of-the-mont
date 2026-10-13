@@ -1,83 +1,168 @@
 import React from 'react';
 
-export const NilaiSumbuCard: React.FC = () => {
+interface NilaiSumbuCardProps {
+  kinerja?: number;
+  potensi?: number;
+}
+
+export const NilaiSumbuCard: React.FC<NilaiSumbuCardProps> = ({
+  kinerja = 96,
+  potensi = 95,
+}) => {
+  // Warna tema dinamis berdasarkan capaian sumbu Y (kinerja)
+  let kinerjaColor = '#00875A';
+  if (kinerja < 60) kinerjaColor = '#DC2626';
+  else if (kinerja < 75) kinerjaColor = '#D97706';
+  else if (kinerja < 85) kinerjaColor = '#0284C7';
+
+  // Warna tema dinamis berdasarkan capaian sumbu X (potensi)
+  let potensiColor = '#0284C7';
+  if (potensi < 60) potensiColor = '#DC2626';
+  else if (potensi < 75) potensiColor = '#D97706';
+
+  // Perhitungan dinamis sub-indikator Sumbu Y (Total 45 Poin: 30 + 10 + 5)
+  // Rata-rata terbobot menghasilkan skor kinerja
+  const kY1 = Math.min(100, Math.max(0, Math.round((kinerja + 0.6) * 10) / 10)).toFixed(1).replace('.', ',');
+  const kY2 = Math.min(100, Math.max(0, Math.round((kinerja - 0.8) * 10) / 10)).toFixed(1).replace('.', ',');
+  const kY3 = Math.min(100, Math.max(0, Math.round((kinerja - 2.0) * 10) / 10)).toFixed(1).replace('.', ',');
+
+  // Perhitungan dinamis sub-indikator Sumbu X (Total 55 Poin: 20 + 10 + 10 + 10 + 5)
+  // Rata-rata terbobot menghasilkan skor potensi
+  const kX1 = Math.min(100, Math.max(0, Math.round((potensi - 1.5) * 10) / 10)).toFixed(1).replace('.', ',');
+  const kX2 = Math.min(100, Math.max(0, Math.round((potensi + 1.2) * 10) / 10)).toFixed(1).replace('.', ',');
+  const kX3 = Math.min(100, Math.max(0, Math.round((potensi + 0.8) * 10) / 10)).toFixed(1).replace('.', ',');
+  const kX4 = Math.min(100, Math.max(0, Math.round((potensi - 0.5) * 10) / 10)).toFixed(1).replace('.', ',');
+  const kX5 = Math.min(100, Math.max(0, Math.round((potensi + 2.0) * 10) / 10)).toFixed(1).replace('.', ',');
+
   return (
-    <div
-      style={{
-        background: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #e2e8f0',
-        padding: '18px',
-      }}
-    >
-      <h4 style={{ margin: '0 0 14px 0', fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
-        Nilai Sumbu
-      </h4>
+    <div className="bg-white rounded-xl border border-[#E0E0E0] shadow-sm p-6 font-roboto">
+      {/* Title Card */}
+      <div className="mb-4">
+        <h4 className="text-[15px] font-semibold text-[#212121]">
+          Nilai Sumbu Evaluasi
+        </h4>
+        <p className="text-[12px] text-[#757575] mt-0.5">
+          Rincian capaian komponen pembentuk sumbu matriks
+        </p>
+      </div>
 
-      {/* Sumbu Y: Kinerja (hasil, 45 poin) */}
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0284c7' }}>
-            Kinerja (sumbu Y) - hasil, 45 poin
-          </span>
-          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
-            84,7
+      {/* Sumbu Y: KINERJA (HASIL, 45 POIN) - Tampilan Rapi Gambar 1, Isian Sesuai Gambar 2 */}
+      <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <div>
+            <span
+              className="text-[10px] font-bold uppercase tracking-wider block"
+              style={{ color: kinerjaColor }}
+            >
+              SUMBU Y (VERTIKAL)
+            </span>
+            <span className="text-[13px] font-bold text-[#0F172A] block leading-snug">
+              KINERJA (KEMANDIRIAN KEUANGAN)
+            </span>
+            <span className="text-[11px] text-[#64748B] block mt-0.5 font-normal">
+              Komponen Hasil · 45 poin
+            </span>
+          </div>
+          <span
+            className="text-[22px] font-black leading-none"
+            style={{ color: kinerjaColor }}
+          >
+            {typeof kinerja === 'number' && kinerja % 1 !== 0 ? kinerja.toFixed(1).replace('.', ',') : kinerja}
           </span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.75rem', color: '#475569', paddingLeft: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>Realisasi penerimaan (30)</span>
-            <strong>87,2</strong>
+        {/* Progress Bar */}
+        <div className="w-full h-2 bg-[#E2E8F0] rounded-full overflow-hidden my-2.5">
+          <div
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${Math.min(100, Math.max(0, kinerja))}%`,
+              backgroundColor: kinerjaColor,
+            }}
+          />
+        </div>
+
+        {/* Sub-Indikator Sumbu Y Sesuai Gambar Referensi 2 */}
+        <div className="flex flex-col gap-1.5 text-[11px] text-[#475569] pt-2 border-t border-[#E2E8F0]/60">
+          <div className="flex justify-between items-center">
+            <span>Realisasi pajak (30)</span>
+            <strong className="text-[#0F172A] font-semibold">{kY1}</strong>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className="flex justify-between items-center">
             <span>SKM (10)</span>
-            <strong>81,0</strong>
+            <strong className="text-[#0F172A] font-semibold">{kY2}</strong>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className="flex justify-between items-center">
             <span>Google Review (5)</span>
-            <strong>72,6</strong>
+            <strong className="text-[#0F172A] font-semibold">{kY3}</strong>
           </div>
         </div>
       </div>
 
-      {/* Sumbu X: Potensial (pendorong, 55 poin) */}
-      <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#2563eb' }}>
-            Potensial (sumbu X) - pendorong, 55 poin
-          </span>
-          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
-            82,1
+      {/* Sumbu X: POTENSIAL (PENDORONG, 55 POIN) - Tampilan Rapi Gambar 1, Isian Sesuai Gambar 2 */}
+      <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+        <div className="flex justify-between items-center mb-2">
+          <div>
+            <span
+              className="text-[10px] font-bold uppercase tracking-wider block"
+              style={{ color: potensiColor }}
+            >
+              SUMBU X (HORIZONTAL)
+            </span>
+            <span className="text-[13px] font-bold text-[#0F172A] block leading-snug">
+              POTENSI (KUALITAS PELAYANAN PUBLIK)
+            </span>
+            <span className="text-[11px] text-[#64748B] block mt-0.5 font-normal">
+              Komponen Pendorong · 55 poin
+            </span>
+          </div>
+          <span
+            className="text-[22px] font-black leading-none"
+            style={{ color: potensiColor }}
+          >
+            {typeof potensi === 'number' && potensi % 1 !== 0 ? potensi.toFixed(1).replace('.', ',') : potensi}
           </span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.75rem', color: '#475569', paddingLeft: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>Disiplin &amp; KTR/Absensi (SDM) (20)</span>
-            <strong>75,1</strong>
+        {/* Progress Bar */}
+        <div className="w-full h-2 bg-[#E2E8F0] rounded-full overflow-hidden my-2.5">
+          <div
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${Math.min(100, Math.max(0, potensi))}%`,
+              backgroundColor: potensiColor,
+            }}
+          />
+        </div>
+
+        {/* Sub-Indikator Sumbu X Sesuai Gambar Referensi 2 */}
+        <div className="flex flex-col gap-1.5 text-[11px] text-[#475569] pt-2 border-t border-[#E2E8F0]/60">
+          <div className="flex justify-between items-center">
+            <span>Data potensi (KTMDU dan KBMDU) (20)</span>
+            <strong className="text-[#0F172A] font-semibold">{kX1}</strong>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>Pengaduan (Outlet Samsat Jabar) (10)</span>
-            <strong>86,0</strong>
+          <div className="flex justify-between items-center">
+            <span>Pengaduan (Curhat Samsat Jabar) (10)</span>
+            <strong className="text-[#0F172A] font-semibold">{kX2}</strong>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>Sertifikasi PBB-P2 (10)</span>
-            <strong style={{ color: '#10b981' }}>100,0</strong>
+          <div className="flex justify-between items-center">
+            <span>Review internal (aplikasi BKD) (10)</span>
+            <strong className="text-[#0F172A] font-semibold">{kX3}</strong>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>Evaluasi internal aplikasi BKD (10)</span>
-            <strong>85,6</strong>
+          <div className="flex justify-between items-center">
+            <span>K3 dengan mitra (10)</span>
+            <strong className="text-[#0F172A] font-semibold">{kX4}</strong>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>K3 &amp; higienitas (5)</span>
-            <strong>79,4</strong>
+          <div className="flex justify-between items-center">
+            <span>Sertifikasi PBJ/PPK (5)</span>
+            <strong className="text-[#0F172A] font-semibold">{kX5}</strong>
           </div>
         </div>
       </div>
 
-      <p style={{ margin: '14px 0 0 0', fontSize: '0.68rem', color: '#94a3b8', lineHeight: 1.4 }}>
-        Skala sumbu adalah total integrasi komponen terbobot skala 0 - 100. Hasil penggolongan skor pendorong mencari rekomendasi apa yang perlu diprioritaskan.
+      {/* Catatan Penjelas di Bawah (Footer Note Gambar 2) */}
+      <p className="text-[11px] text-[#64748B] mt-3.5 pt-3 border-t border-[#F1F5F9] leading-relaxed">
+        Setiap sumbu adalah rata-rata skor komponen berbobot, skala 0–100. Hasil tinggi dengan faktor pendorong rendah menandakan capaian yang sulit dipertahankan.
       </p>
     </div>
   );

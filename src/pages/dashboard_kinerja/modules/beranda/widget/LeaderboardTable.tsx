@@ -110,15 +110,15 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
           <thead>
             <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#475569' }}>
-              <th style={{ padding: '10px 14px', width: '70px' }}>PERINGKAT</th>
-              <th style={{ padding: '10px 14px' }}>NAMA P3DW</th>
-              <th style={{ padding: '10px 14px' }}>TOTAL SKOR</th>
-              <th style={{ padding: '10px 14px' }}>PREDIKAT</th>
-              <th style={{ padding: '10px 14px', textAlign: 'center' }}>A (40%)</th>
-              <th style={{ padding: '10px 14px', textAlign: 'center' }}>B (20%)</th>
-              <th style={{ padding: '10px 14px', textAlign: 'center' }}>C (20%)</th>
-              <th style={{ padding: '10px 14px', textAlign: 'center' }}>D (10%)</th>
-              <th style={{ padding: '10px 14px', textAlign: 'center' }}>E (10%)</th>
+              <th style={{ padding: '10px 14px', width: '70px', borderRight: '1px solid #e2e8f0' }}>PERINGKAT</th>
+              <th style={{ padding: '10px 14px', borderRight: '1px solid #e2e8f0' }}>NAMA P3DW</th>
+              <th style={{ padding: '10px 14px', borderRight: '1px solid #e2e8f0' }}>TOTAL SKOR</th>
+              <th style={{ padding: '10px 14px', borderRight: '1px solid #e2e8f0' }}>PREDIKAT</th>
+              <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>A (40%)</th>
+              <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>B (20%)</th>
+              <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>C (20%)</th>
+              <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>D (10%)</th>
+              <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>E (10%)</th>
               <th style={{ padding: '10px 14px', textAlign: 'center' }}>AKSI</th>
             </tr>
           </thead>
@@ -127,18 +127,18 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               <tr
                 key={row.id}
                 style={{
-                  borderBottom: '1px solid #f1f5f9',
+                  borderBottom: '1px solid #e2e8f0',
                   transition: 'background 0.15s',
                 }}
                 className="table-row-hover"
               >
-                <td style={{ padding: '12px 14px', fontWeight: 800, color: '#0f172a' }}>
+                <td style={{ padding: '12px 14px', fontWeight: 800, color: '#0f172a', borderRight: '1px solid #e2e8f0' }}>
                   #{idx + 1}
                 </td>
-                <td style={{ padding: '12px 14px', fontWeight: 600, color: '#0f172a' }}>
+                <td style={{ padding: '12px 14px', fontWeight: 600, color: '#0f172a', borderRight: '1px solid #e2e8f0' }}>
                   {row.unit}
                 </td>
-                <td style={{ padding: '12px 14px' }}>
+                <td style={{ padding: '12px 14px', borderRight: '1px solid #e2e8f0' }}>
                   <span
                     style={{
                       fontWeight: 800,
@@ -154,7 +154,7 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                     {row.skorTotal.toFixed(1)}
                   </span>
                 </td>
-                <td style={{ padding: '12px 14px' }}>
+                <td style={{ padding: '12px 14px', borderRight: '1px solid #e2e8f0' }}>
                   <span
                     style={{
                       background:
@@ -182,16 +182,17 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                     {row.predikat}
                   </span>
                 </td>
-                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600 }}>{row.scoreA}</td>
-                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600 }}>{row.scoreB}</td>
-                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600 }}>{row.scoreC}</td>
-                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600 }}>{row.scoreD}</td>
+                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600, borderRight: '1px solid #e2e8f0' }}>{row.scoreA}</td>
+                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600, borderRight: '1px solid #e2e8f0' }}>{row.scoreB}</td>
+                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600, borderRight: '1px solid #e2e8f0' }}>{row.scoreC}</td>
+                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600, borderRight: '1px solid #e2e8f0' }}>{row.scoreD}</td>
                 <td
                   style={{
                     padding: '12px 14px',
                     textAlign: 'center',
                     fontWeight: 700,
                     color: row.scoreE < 50 ? '#ef4444' : '#0f172a',
+                    borderRight: '1px solid #e2e8f0',
                   }}
                 >
                   {row.scoreE}

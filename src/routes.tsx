@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '@/layout';
 
-import BerandaView from '@/pages/dashboard_kinerja/modules/beranda/view/BerandaView';
+import BerandaView from '@/pages/beranda';
 import DetailAnalisisView from '@/pages/dashboard_kinerja/modules/detail_analisis/view/DetailAnalisisView';
 import LoginView from '@/pages/auth/modules/login/view/LoginView';
 

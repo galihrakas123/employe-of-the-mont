@@ -1,12 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --bg-main: #f8fafc;
+  --font-family: 'Roboto', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --primary: #00875A;
+  --primary-dark: #006644;
+  --primary-light: #E6F4EA;
+  --bg-main: #f4f6fa;
   --bg-card: #ffffff;
   --border: #e2e8f0;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  --text-main: #212121;
+  --text-muted: #757575;
+  color-scheme: light;
+}
+
+html.dark {
+  --bg-main: #0B1120;
+  --bg-card: #1E293B;
+  --border: #334155;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  color-scheme: dark;
 }
 
 *, *::before, *::after {
@@ -21,43 +36,21 @@ body {
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-input, button, select, textarea {
-  font-family: inherit;
-}
-
-/* Animations & Transitions */
-.table-row-hover:hover {
-  background-color: #f8fafc;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
-  transform: translateY(-1px);
-}
-
-.btn-outline:hover {
-  background: #f0fdf4 !important;
-}
-
-.btn-secondary:hover {
-  background: #e2e8f0 !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #0F172A;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -65,17 +58,133 @@ input, button, select, textarea {
   border-radius: 4px;
 }
 
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 0.9;
+/* ========================================================
+   DARK MODE COLOR DESIGN SYSTEM OVERRIDES (BAPENDA TOKENS)
+   ======================================================== */
+html.dark body {
+  background-color: #0B1120;
+  color: #F8FAFC;
+}
+
+html.dark .bg-\[\#f4f6fa\] {
+  background-color: #0B1120 !important;
+}
+
+html.dark .bg-white,
+html.dark .bg-white\/95 {
+  background-color: #1E293B !important;
+}
+
+html.dark .bg-\[\#F8FAFC\],
+html.dark .bg-\[\#F5F5F5\],
+html.dark .bg-\[\#f8fafc\],
+html.dark .bg-\[\#FAFAFA\],
+html.dark .bg-\#f4f6fa {
+  background-color: #0F172A !important;
+}
+
+html.dark .bg-\[\#F1F5F9\] {
+  background-color: #1E293B !important;
+}
+
+html.dark .bg-\[\#F8FAFC\]\/60 {
+  background-color: #1E293B !important;
+}
+
+/* Borders */
+html.dark .border-\[\#E0E0E0\],
+html.dark .border-\[\#e2e8f0\],
+html.dark .border-\[\#E2E8F0\],
+html.dark .border-\[\#CBD5E1\],
+html.dark .border-\[\#cbd5e1\],
+html.dark .border-\[\#E5E7EB\],
+html.dark .border-\[\#F1F5F9\] {
+  border-color: #334155 !important;
+}
+
+/* Typography */
+html.dark .text-\[\#212121\],
+html.dark .text-\[\#0F172A\],
+html.dark .text-\[\#0f172a\] {
+  color: #F8FAFC !important;
+}
+
+html.dark .text-\[\#424242\],
+html.dark .text-\[\#475569\],
+html.dark .text-\[\#334155\],
+html.dark .text-\[\#1E293B\] {
+  color: #CBD5E1 !important;
+}
+
+html.dark .text-\[\#757575\],
+html.dark .text-\[\#64748b\],
+html.dark .text-\[\#64748B\],
+html.dark .text-\[\#94a3b8\],
+html.dark .text-\[\#94A3B8\] {
+  color: #94A3B8 !important;
+}
+
+/* Soft Green Containers in Dark Mode */
+html.dark .bg-\[\#E6F4EA\],
+html.dark .bg-\[\#E8F8EE\] {
+  background-color: rgba(0, 135, 90, 0.22) !important;
+  color: #34D399 !important;
+}
+
+/* Header & Table in Dark Mode */
+html.dark header {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+html.dark table tbody tr {
+  border-color: #334155 !important;
+}
+
+html.dark table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Custom Leaflet Popup */
+.custom-leaflet-popup .leaflet-popup-content-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 4px 6px;
+  border: 1px solid #E2E8F0;
+}
+
+html.dark .custom-leaflet-popup .leaflet-popup-content-wrapper {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+
+.custom-leaflet-popup .leaflet-popup-content {
+  margin: 10px 14px 10px 10px !important;
+  line-height: 1.4 !important;
+}
+
+.custom-leaflet-popup .leaflet-popup-tip {
+  background: #ffffff;
+}
+
+html.dark .custom-leaflet-popup .leaflet-popup-tip {
+  background: #1E293B !important;
+}
+
+/* Scatter Point animations */
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
   }
 }

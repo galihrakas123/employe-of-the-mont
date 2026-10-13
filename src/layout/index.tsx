@@ -2,18 +2,21 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import { SidebarProvider } from './SidebarContext';
 
 export const MainLayout: React.FC = () => {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc' }}>
-      <Sidebar />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <Header />
-        <main style={{ flex: 1, padding: '28px', maxWidth: '1440px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
-          <Outlet />
-        </main>
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-[#f4f6fa] text-slate-800 font-sans antialiased">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
+          <Header />
+          <main className="flex-1 w-full box-border">
+            <Outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

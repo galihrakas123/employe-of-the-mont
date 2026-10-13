@@ -1,83 +1,88 @@
 import React from 'react';
 
-export const MiniNineBoxCard: React.FC = () => {
-  return (
-    <div
-      style={{
-        background: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #e2e8f0',
-        padding: '18px',
-      }}
-    >
-      <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
-        Matriks Kinerja dan Potensial
-      </h4>
-      <p style={{ margin: '2px 0 12px 0', fontSize: '0.72rem', color: '#64748b' }}>
-        Posisi unit pada sembilan kotak evaluasi kinerja P3DW
-      </p>
+interface MiniNineBoxCardProps {
+  boxNumber?: number;
+  boxTitle?: string;
+}
 
-      {/* Mini 9-Box Grid with Box 9 dot selected */}
+export const MiniNineBoxCard: React.FC<MiniNineBoxCardProps> = ({
+  boxNumber = 9,
+  boxTitle = 'Box 9 (Unggul Penuh)',
+}) => {
+  const getDotStyle = (active: boolean, color: string, haloColor: string) => {
+    if (!active) return null;
+    return (
       <div
+        className="w-3.5 h-3.5 rounded-full border-2 border-white absolute right-2.5 bottom-2.5"
         style={{
-          position: 'relative',
-          height: '190px',
-          border: '1px solid #cbd5e1',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gridTemplateRows: 'repeat(3, 1fr)',
-          background: '#ffffff',
+          backgroundColor: color,
+          boxShadow: `0 0 0 3px ${haloColor}, 0 2px 4px rgba(0,0,0,0.15)`,
         }}
-      >
-        <div style={{ background: '#f8fafc', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '4px' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#475569' }}>Box 7</span>
+      />
+    );
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-[#E0E0E0] shadow-sm p-6 font-roboto">
+      <div className="mb-3.5">
+        <h4 className="text-[15px] font-semibold text-[#212121]">
+          Matriks Kinerja dan Potensial
+        </h4>
+        <p className="text-[12px] text-[#757575] mt-0.5">
+          Posisi unit pada sembilan kuadran evaluasi kinerja
+        </p>
+      </div>
+
+      {/* Mini 9-Box Grid with Approved Pastel Colors */}
+      <div className="relative h-[200px] border border-[#CBD5E1] rounded-lg overflow-hidden grid grid-cols-3 grid-rows-3 bg-white shadow-xs">
+        {/* Row 1: Box 7, 8, 9 */}
+        <div className="bg-[#F8FAFC] border-r border-b border-[#E2E8F0] p-2 flex flex-col justify-start relative">
+          <span className="text-[11px] font-bold text-[#1E293B]">Box 7</span>
+          {getDotStyle(boxNumber === 7, '#0284c7', 'rgba(2, 132, 199, 0.35)')}
         </div>
-        <div style={{ background: '#f1f5f9', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '4px' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#475569' }}>Box 8</span>
+        <div className="bg-[#F8FAFC] border-r border-b border-[#E2E8F0] p-2 flex flex-col justify-start relative">
+          <span className="text-[11px] font-bold text-[#1E293B]">Box 8</span>
+          {getDotStyle(boxNumber === 8, '#0284c7', 'rgba(2, 132, 199, 0.35)')}
         </div>
-        <div style={{ background: '#e0f2fe', borderBottom: '1px solid #e2e8f0', padding: '4px', position: 'relative' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#0369a1' }}>Box 9</span>
-          {/* Active Highlight Marker Circle with Dot */}
-          <div
-            style={{
-              position: 'absolute',
-              right: '16px',
-              bottom: '12px',
-              width: '18px',
-              height: '18px',
-              borderRadius: '50%',
-              background: '#1d4ed8',
-              border: '3px solid #ffffff',
-              boxShadow: '0 0 0 4px rgba(29, 78, 216, 0.35)',
-            }}
-          />
+        <div className="bg-[#E6F4FF] border-b border-[#E2E8F0] p-2 flex flex-col justify-start relative">
+          <span className="text-[11px] font-bold text-[#0066CC]">Box 9</span>
+          {getDotStyle(boxNumber === 9, '#00875A', 'rgba(0, 135, 90, 0.4)')}
         </div>
 
-        <div style={{ background: '#fef2f2', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '4px' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#991b1b' }}>Box 4</span>
+        {/* Row 2: Box 4, 5, 6 */}
+        <div className="bg-[#FFF0F2] border-r border-b border-[#E2E8F0] p-2 flex flex-col justify-start relative">
+          <span className="text-[11px] font-bold text-[#B91C1C]">Box 4</span>
+          {getDotStyle(boxNumber === 4, '#E53935', 'rgba(229, 57, 53, 0.4)')}
         </div>
-        <div style={{ background: '#fffbeb', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '4px' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#92400e' }}>Box 5</span>
+        <div className="bg-[#FFFDEB] border-r border-b border-[#E2E8F0] p-2 flex flex-col justify-start relative">
+          <span className="text-[11px] font-bold text-[#B45309]">Box 5</span>
+          {getDotStyle(boxNumber === 5, '#FF8F00', 'rgba(255, 143, 0, 0.4)')}
         </div>
-        <div style={{ background: '#f0fdf4', borderBottom: '1px solid #e2e8f0', padding: '4px' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#166534' }}>Box 6</span>
+        <div className="bg-[#ECFDF5] border-b border-[#E2E8F0] p-2 flex flex-col justify-start relative">
+          <span className="text-[11px] font-bold text-[#00875A]">Box 6</span>
+          {getDotStyle(boxNumber === 6, '#0284c7', 'rgba(2, 132, 199, 0.35)')}
         </div>
 
-        <div style={{ background: '#fee2e2', borderRight: '1px solid #e2e8f0', padding: '4px' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#b91c1c' }}>Box 1</span>
+        {/* Row 3: Box 1, 2, 3 */}
+        <div className="bg-[#FFF0F2] border-r border-[#E2E8F0] p-2 flex flex-col justify-start relative">
+          <span className="text-[11px] font-bold text-[#B91C1C]">Box 1</span>
+          {getDotStyle(boxNumber === 1, '#E53935', 'rgba(229, 57, 53, 0.4)')}
         </div>
-        <div style={{ background: '#fef3c7', borderRight: '1px solid #e2e8f0', padding: '4px' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#b45309' }}>Box 2</span>
+        <div className="bg-[#FEF3C7] border-r border-[#E2E8F0] p-2 flex flex-col justify-start relative">
+          <span className="text-[11px] font-bold text-[#B45309]">Box 2</span>
+          {getDotStyle(boxNumber === 2, '#f97316', 'rgba(249, 115, 22, 0.4)')}
         </div>
-        <div style={{ background: '#f8fafc', padding: '4px' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#475569' }}>Box 3</span>
+        <div className="bg-[#F8FAFC] p-2 flex flex-col justify-start relative">
+          <span className="text-[11px] font-bold text-[#1E293B]">Box 3</span>
+          {getDotStyle(boxNumber === 3, '#0284c7', 'rgba(2, 132, 199, 0.35)')}
         </div>
       </div>
 
-      <div style={{ marginTop: '8px', textAlign: 'center', fontSize: '0.72rem', color: '#0284c7', fontWeight: 700 }}>
-        ● Posisi Saat Ini: Box 9 (Bintang Utama)
+      <div className="mt-3.5 text-center">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#E6F4EA] text-[#00875A] border border-[#00875A]/20">
+          <span className="w-2 h-2 rounded-full bg-[#00875A]" />
+          Posisi Unit: {boxTitle}
+        </span>
       </div>
     </div>
   );
