@@ -1,7 +1,8 @@
 import React from 'react';
 import useLoginController from '../controller/useLoginController';
 import Button from '@/components/ui/Button';
-import { Layers, Lock, Mail, ArrowRight } from 'lucide-react';
+import { Lock, Mail, ArrowRight } from 'lucide-react';
+import bapendaLogo from '@/assets/bapenda-logo.png';
 
 export const LoginView: React.FC = () => {
   const { email, setEmail, password, setPassword, handleLogin } = useLoginController();
@@ -30,19 +31,21 @@ export const LoginView: React.FC = () => {
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div
             style={{
-              width: '60px',
-              height: '60px',
+              width: '64px',
+              height: '64px',
               margin: '0 auto 16px',
-              borderRadius: '16px',
-              background: '#16a34a',
+              borderRadius: '18px',
+              background: '#ffffff',
+              border: '1px solid #E2E8F0',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 8px 16px rgba(22, 163, 74, 0.35)',
-              color: '#ffffff',
+              boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
+              padding: '10px',
+              overflow: 'hidden',
             }}
           >
-            <Layers size={32} />
+            <img src={bapendaLogo} alt="Logo Bapenda" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
             Dashboard Kinerja Strategis
