@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Award,
   LogOut,
   Layers,
 } from 'lucide-react';
@@ -10,7 +9,6 @@ import {
 export const Sidebar: React.FC = () => {
   const menuItems = [
     { path: '/beranda', label: 'Dashboard Kinerja', icon: LayoutDashboard },
-    { path: '/beranda/detail-analisis', label: 'Detail Analisis Area', icon: Award },
   ];
 
   return (
