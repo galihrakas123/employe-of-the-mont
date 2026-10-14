@@ -63,7 +63,7 @@ export const DetailAnalisisView: React.FC = () => {
                   {unitData.totalSkor.toFixed(1)}
                 </span>
                 <span className="text-[12px] font-bold text-[#64748B]">
-                  / 100
+                  / 120
                 </span>
               </div>
             </div>
@@ -75,9 +75,6 @@ export const DetailAnalisisView: React.FC = () => {
                 )}`}
               >
                 {scatterData.kategori}
-              </span>
-              <span className="text-[10px] text-[#94A3B8] font-medium">
-                Predikat: <strong className="text-[#00875A]">{unitData.predikat}</strong>
               </span>
             </div>
           </div>
@@ -97,6 +94,11 @@ export const DetailAnalisisView: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <RadarKomposisiChart
                 scores={{
+                  pendapatan: unitData.pendapatanScore,
+                  kepatuhan: unitData.kepatuhanScore,
+                  pelayanan: unitData.pelayananScore,
+                  tataKelola: unitData.tataKelolaScore,
+                  sdm: unitData.sdmScore,
                   a: unitData.scoreA,
                   b: unitData.scoreB,
                   c: unitData.scoreC,
@@ -112,12 +114,13 @@ export const DetailAnalisisView: React.FC = () => {
               unitName={unitData.namaP3dw}
               totalSkor={unitData.totalSkor}
               kategori={scatterData.kategori}
+              scorePendapatan={unitData.pendapatanScore}
               scoreA={unitData.scoreA}
               scoreE={unitData.scoreE}
             />
 
             {/* 4. Target OKR & Area Fokus (Menyesuaikan capaian nilai unit kerja) */}
-            <FocusAreaCard scoreSDM={unitData.scoreE} bobot={10} />
+            <FocusAreaCard scoreSDM={unitData.sdmScore ?? unitData.scoreE} bobot={15} />
 
             {/* 5. Tabel Rincian Evaluasi & Tren Penilaian (Sejajar lebarnya dengan card di atasnya) */}
             <TrenPenilaianTable totalSkor={unitData.totalSkor} />
@@ -125,16 +128,24 @@ export const DetailAnalisisView: React.FC = () => {
 
           {/* Right Column (1 Col) - Sticky saat scroll */}
           <div className="lg:col-span-1 space-y-6 sticky top-[152px]">
-            {/* Matriks Kinerja dan Potensial (Mini 9-Box) */}
+            {/* Matriks Kinerja dan Potensial (Mini 9-Box dengan Sumbu X & Y) */}
             <MiniNineBoxCard
               boxNumber={scatterData.boxNumber}
               boxTitle={scatterData.box}
+              kinerja={scatterData.y}
+              potensi={scatterData.x}
+              unitName={unitData.namaP3dw}
             />
 
             {/* Nilai Sumbu Evaluasi */}
             <NilaiSumbuCard
               kinerja={scatterData.y}
               potensi={scatterData.x}
+              pendapatan={scatterData.pendapatan}
+              kepatuhan={scatterData.kepatuhan}
+              pelayanan={scatterData.pelayanan}
+              tataKelola={scatterData.tataKelola}
+              sdm={scatterData.sdm}
             />
           </div>
         </div>

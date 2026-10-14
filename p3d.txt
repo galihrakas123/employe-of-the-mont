@@ -1,0 +1,138 @@
+"data": [
+        {
+            "kd_wil": "10200",
+            "nm_wil": "P3D Wil. Kab. Bogor - Cibinong"
+        },
+        {
+            "kd_wil": "10300",
+            "nm_wil": "P3D Wil. Kota Bogor"
+        },
+        {
+            "kd_wil": "10400",
+            "nm_wil": "P3D Wil. Kota Sukabumi"
+        },
+        {
+            "kd_wil": "10500",
+            "nm_wil": "P3D Wil. Kab. Sukabumi I Cibadak"
+        },
+        {
+            "kd_wil": "10510",
+            "nm_wil": "P3D Wil. Kab. Sukabumi II Pelabuhan Ratu"
+        },
+        {
+            "kd_wil": "10700",
+            "nm_wil": "P3D Wil. Kab. Cianjur"
+        },
+        {
+            "kd_wil": "11000",
+            "nm_wil": "P3D Wil. Kab. Karawang"
+        },
+        {
+            "kd_wil": "11100",
+            "nm_wil": "P3D Wil. Kab. Purwakarta"
+        },
+        {
+            "kd_wil": "11200",
+            "nm_wil": "P3D Wil. Kab. Subang"
+        },
+        {
+            "kd_wil": "11300",
+            "nm_wil": "P3D Wil. Kota Cirebon"
+        },
+        {
+            "kd_wil": "11400",
+            "nm_wil": "P3D Wil. Kab Cirebon I Sumber"
+        },
+        {
+            "kd_wil": "11410",
+            "nm_wil": "P3D Wil. Kab. Cirebon II Ciledug"
+        },
+        {
+            "kd_wil": "11600",
+            "nm_wil": "P3D Wil. Kab Indramayu I"
+        },
+        {
+            "kd_wil": "11610",
+            "nm_wil": "P3D Wil. Kab Indramayu II Haurgeulis"
+        },
+        {
+            "kd_wil": "11800",
+            "nm_wil": "P3D Wil. Kab. Kuningan"
+        },
+        {
+            "kd_wil": "11900",
+            "nm_wil": "P3D Wil. Kab. Majalengka"
+        },
+        {
+            "kd_wil": "12000",
+            "nm_wil": "P3D Wil. Kota Bandung I Pajajaran"
+        },
+        {
+            "kd_wil": "12010",
+            "nm_wil": "P3D Wil. Kota Bandung II Kawaluyaan"
+        },
+        {
+            "kd_wil": "12020",
+            "nm_wil": "P3D Wil. Kota Bandung III Soetta"
+        },
+        {
+            "kd_wil": "12300",
+            "nm_wil": "P3D Wil. Kab. Bandung Barat"
+        },
+        {
+            "kd_wil": "12400",
+            "nm_wil": "P3D Wil. Kab. Bandung I Rancaekek"
+        },
+        {
+            "kd_wil": "12410",
+            "nm_wil": "P3D Wil. Kab. Bandung II Soreang"
+        },
+        {
+            "kd_wil": "12500",
+            "nm_wil": "P3D Wil. Kab. Sumedang"
+        },
+        {
+            "kd_wil": "12600",
+            "nm_wil": "P3D Wil. Kab. Garut"
+        },
+        {
+            "kd_wil": "12700",
+            "nm_wil": "P3D Wil. Kota Tasikmalaya"
+        },
+        {
+            "kd_wil": "12800",
+            "nm_wil": "P3D Wil. Kab. Tasikmalaya - Sukaraja"
+        },
+        {
+            "kd_wil": "12900",
+            "nm_wil": "P3D Wil. Kab. Ciamis"
+        },
+        {
+            "kd_wil": "12910",
+            "nm_wil": "P3D Wil. Kab. Pangandaran"
+        },
+        {
+            "kd_wil": "13100",
+            "nm_wil": "P3D Wil. Kota Cimahi"
+        },
+        {
+            "kd_wil": "13300",
+            "nm_wil": "P3D Wil. Kota Banjar"
+        },
+        {
+            "kd_wil": "20100",
+            "nm_wil": "P3D Wil. Kota Depok I"
+        },
+        {
+            "kd_wil": "20110",
+            "nm_wil": "P3D Wil. Kota Depok II Cinere"
+        },
+        {
+            "kd_wil": "20800",
+            "nm_wil": "P3D Wil. Kota Bekasi"
+        },
+        {
+            "kd_wil": "20900",
+            "nm_wil": "P3D Wil. Kab. Bekasi - Cikarang"
+        }
+    ]

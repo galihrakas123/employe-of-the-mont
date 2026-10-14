@@ -6,7 +6,6 @@ import {
   Banknote,
   AlertTriangle,
   ChevronDown,
-  Building2,
   ArrowUpRight,
   Filter,
   MapPin,
@@ -15,6 +14,7 @@ import {
   ChevronRight,
   Check,
   TrendingUp,
+  HelpCircle,
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -24,9 +24,12 @@ import {
   mockLeaderboardData,
   mockMapMarkers,
   P3dwScatterData,
+  getGridCoordinates,
+  korwilMasterData,
+  KorwilGroupInfo,
 } from '@/services/dashboardMockData';
 import CustomSelect from '@/components/ui/CustomSelect';
-import SearchBar from '@/components/ui/SearchBar';
+import NineBoxExplanationModal from '@/components/ui/NineBoxExplanationModal';
 
 // Custom Leaflet Marker with Bapenda Design Tokens
 const createMarkerIcon = (color: string) => {
@@ -70,41 +73,63 @@ export const BerandaDashboardPage: React.FC = () => {
   const [selectedUnit, setSelectedUnit] = useState<P3dwScatterData>(mockScatterData[0]);
   const [hoveredUnit, setHoveredUnit] = useState<P3dwScatterData | null>(null);
   const [filterKlaster, setFilterKlaster] = useState<string>('ALL');
-  const [filterKanwil, setFilterKanwil] = useState<string>('ALL');
+  const [filterKorwil, setFilterKorwil] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [showAllData, setShowAllData] = useState<boolean>(false);
+  const [isExplanationModalOpen, setIsExplanationModalOpen] = useState<boolean>(false);
+  const [selectedBoxModal, setSelectedBoxModal] = useState<number>(9);
+
+  const handleOpenBoxExplanation = (boxNum: number) => {
+    setSelectedBoxModal(boxNum);
+    setIsExplanationModalOpen(true);
+  };
+
+  const handleSelectBranch = (branchName: string) => {
+    const match = mockScatterData.find(
+      (s) =>
+        s.nama.toLowerCase() === branchName.toLowerCase() ||
+        s.nama.toLowerCase().includes(branchName.toLowerCase()) ||
+        branchName.toLowerCase().includes(s.nama.toLowerCase())
+    );
+    if (match) {
+      setSelectedUnit(match);
+      setFilterKorwil(match.korwil || 'ALL');
+      setSearchQuery('');
+    }
+  };
 
   // Options untuk CustomSelect (Matching Referensi Gambar)
   const klasterOptions = [
     { label: 'Semua Klaster', value: 'ALL' },
-    { label: 'Klaster Kuat', value: 'Kuat' },
-    { label: 'Klaster Sedang', value: 'Sedang' },
-    { label: 'Klaster Kurang', value: 'Kurang' },
+    { label: 'Klaster Besar', value: 'Klaster Besar' },
+    { label: 'Klaster Sedang', value: 'Klaster Sedang' },
+    { label: 'Klaster Kecil', value: 'Klaster Kecil' },
   ];
 
-  const kanwilOptions = [
-    { label: 'Semua Kanwil', value: 'ALL' },
-    { label: 'Korwil I', value: 'Korwil I' },
-    { label: 'Korwil II', value: 'Korwil II' },
-    { label: 'Korwil III', value: 'Korwil III' },
-    { label: 'Korwil V', value: 'Korwil V' },
+  const korwilOptions = [
+    { label: 'Semua Korwil', value: 'ALL' },
+    { label: 'Korwil Bandung Raya', value: 'Korwil Bandung Raya' },
+    { label: 'Korwil Purwakarta', value: 'Korwil Purwakarta' },
+    { label: 'Korwil Bogor', value: 'Korwil Bogor' },
+    { label: 'Korwil Priangan Timur', value: 'Korwil Priangan Timur' },
+    { label: 'Korwil Ciayumajakuning', value: 'Korwil Ciayumajakuning' },
   ];
 
   // Filtered Leaderboard
   const filteredLeaderboard = mockLeaderboardData.filter((item) => {
     const matchKlaster = filterKlaster === 'ALL' || item.klaster === filterKlaster;
-    const matchKanwil = filterKanwil === 'ALL' || item.kanwil === filterKanwil;
-    const matchSearch = item.namaP3dw.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchKlaster && matchKanwil && matchSearch;
+    const matchKorwil = filterKorwil === 'ALL' || item.kanwil === filterKorwil;
+    const q = searchQuery.toLowerCase().trim();
+    const matchSearch =
+      !q ||
+      item.namaP3dw.toLowerCase().includes(q) ||
+      (item.namaPendek && item.namaPendek.toLowerCase().includes(q)) ||
+      (item.kd_wil && item.kd_wil.includes(q));
+    return matchKlaster && matchKorwil && matchSearch;
   });
 
-  // Pagination calculation
-  const totalPages = Math.max(1, Math.ceil(filteredLeaderboard.length / itemsPerPage));
-  const paginatedLeaderboard = filteredLeaderboard.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Default tampilkan 10 data, dapat di-expand dengan button "Lihat Semua"
+  const displayedLeaderboard = showAllData ? filteredLeaderboard : filteredLeaderboard.slice(0, 10);
 
   // Color mapping untuk Scatter points
   const getPointColor = (kategori: string) => {
@@ -160,16 +185,48 @@ export const BerandaDashboardPage: React.FC = () => {
     }
   };
 
-  // Helper warna teks angka kolom A, B, C, D, E (sesuai color tokens)
+  // Helper warna latar baris tabel berdasarkan Predikat Kinerja (Sesuai Keterangan Warna & Referensi Gambar)
+  const getRowBgColor = (grade: string, predikat: string, isSelected: boolean) => {
+    if (isSelected) return 'bg-[#E6F4EA] dark:bg-[#00875A]/30 border-l-4 border-l-[#00875A]';
+    const g = (grade || '').toUpperCase();
+    const p = (predikat || '').toLowerCase();
+    // Kinerja Kuat (A)
+    if (g === 'A' || p.includes('sangat baik')) {
+      return 'bg-[#F0FDF4] hover:bg-[#DCFCE7]/70 dark:bg-[#064E3B]/20 dark:hover:bg-[#064E3B]/35';
+    }
+    // Sedang (B)
+    if (g === 'B' || p.includes('baik')) {
+      return 'bg-[#FEFCE8] hover:bg-[#FEF9C3]/70 dark:bg-[#78350F]/20 dark:hover:bg-[#78350F]/35';
+    }
+    // Kurang (C/D)
+    return 'bg-[#FFF1F2] hover:bg-[#FFE4E6]/70 dark:bg-[#881337]/20 dark:hover:bg-[#881337]/35';
+  };
+
+  // Helper styling predikat lengkap (Sesuai Referensi Gambar)
+  const getPredikatBadgeStyle = (predikat: string) => {
+    const p = predikat.toLowerCase();
+    if (p.includes('sangat baik') || p === 'a') {
+      return 'bg-[#E6F4EA] text-[#00875A] border border-[#00875A]/20 dark:bg-[#00875A]/25 dark:text-[#34D399]';
+    }
+    if (p.includes('baik') || p === 'b') {
+      return 'bg-[#E0F2FE] text-[#0284C7] border border-[#0284C7]/20 dark:bg-[#0284C7]/25 dark:text-[#38BDF8]';
+    }
+    if (p.includes('cukup') || p === 'c') {
+      return 'bg-[#FEF3C7] text-[#D97706] border border-[#D97706]/20 dark:bg-[#D97706]/25 dark:text-[#FBBF24]';
+    }
+    return 'bg-[#FEE2E2] text-[#DC2626] border border-[#DC2626]/20 dark:bg-[#DC2626]/25 dark:text-[#F87171]';
+  };
+
+  // Helper warna teks angka nilai pilar A, B, C, D, E (Sesuai Referensi Gambar)
   const getScoreTextColor = (score: number) => {
-    if (score >= 85) return 'text-[#00875A] font-medium';
-    if (score >= 70) return 'text-[#FF8F00] font-medium';
-    return 'text-[#E53935] font-medium';
+    if (score >= 90) return 'text-[#00875A] dark:text-[#34D399]';
+    if (score >= 75) return 'text-[#EA580C] dark:text-[#FB923C]';
+    return 'text-[#DC2626] dark:text-[#F87171]';
   };
 
   return (
     <div className="flex flex-col gap-6 max-w-[1500px] mx-auto p-6 lg:p-7 pb-10 font-roboto antialiased text-[#212121]">
-      {/* 0. PAGE TITLE (Matching Gambar Kedua Skin: "Dashboard  Kinerja Strategis") */}
+      {/* 0. PAGE TITLE (Sesuai Dokumen Talent Box KPI Kepala Pusat Cabang Samsat) */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
           <h1 className="text-[26px] font-semibold text-[#212121] tracking-tight leading-tight">
@@ -181,40 +238,36 @@ export const BerandaDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 1. TOP KPI CARDS (Matching Gambar Referensi Persis) */}
+      {/* 1. TOP KPI CARDS (Agregasi 34 Cabang P3DW Berdasarkan Standar Baku) */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Card 1: Total / Rata-rata Skor KPI (Solid Green Highlight Card) */}
+        {/* Card 1: Rata-rata Skor Akhir */}
         <div className="bg-[#00875A] rounded-2xl p-5 shadow-sm text-white flex flex-col justify-between hover:shadow-md transition-shadow min-h-[140px]">
-          {/* Top Row: Label & Circular Icon Badge */}
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-white/85 uppercase font-roboto">
-              RATA-RATA SKOR KPI
+              RATA-RATA SKOR AKHIR
             </span>
             <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center shrink-0">
               <Activity size={16} />
             </div>
           </div>
 
-          {/* Middle Row: Big Bold White Number */}
           <div className="my-2">
             <div className="flex items-baseline gap-1">
               <span className="text-[32px] font-black text-white leading-none tracking-tight font-roboto">
-                78.5
+                {mockKpiTopCards[0].value}
               </span>
-              <span className="text-[14px] font-semibold text-white/80">/ 100</span>
+              <span className="text-[14px] font-semibold text-white/80">/ 120</span>
             </div>
           </div>
 
-          {/* Bottom Row: Subtitle with Trend Indicator */}
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/90">
             <TrendingUp size={14} />
-            <span>Gabungan 5 Area (A–E)</span>
+            <span>0,55 Kinerja (Y) + 0,45 Potensi (X)</span>
           </div>
         </div>
 
-        {/* Card 2: Sukses Terkirim / Cabang Bintang Utama (White Card + Green Subtitle) */}
+        {/* Card 2: Kapus of the Month (Box 9) */}
         <div className="bg-white rounded-2xl p-5 border border-[#E5E7EB] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow min-h-[140px]">
-          {/* Top Row: Label & Mint Green Icon Badge */}
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-[#64748B] uppercase font-roboto">
               Kapus of the Month
@@ -224,50 +277,44 @@ export const BerandaDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Middle Row: Big Bold Navy Number */}
           <div className="my-2">
             <div className="flex items-baseline gap-1.5">
               <span className="text-[32px] font-black text-[#0F172A] leading-none tracking-tight font-roboto">
-                8
+                {mockKpiTopCards[1].value}
               </span>
               <span className="text-[13px] font-semibold text-[#64748B]">P3DW</span>
             </div>
           </div>
 
-          {/* Bottom Row: Green Status Text */}
           <div className="text-[11px] font-semibold text-[#00875A]">
-            Kinerja optimal di Kuadran Box 9
+            Box 9 (Kinerja ≥ 100 &amp; Potensi ≥ 95)
           </div>
         </div>
 
-        {/* Card 3: Realisasi PKB (White Card + Neutral Subtitle) */}
+        {/* Card 3: Realisasi Pendapatan vs Target */}
         <div className="bg-white rounded-2xl p-5 border border-[#E5E7EB] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow min-h-[140px]">
-          {/* Top Row: Label & Mint Green Icon Badge */}
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-[#64748B] uppercase font-roboto">
-              Realisasi PKB terhadap target
+              Realisasi Pendapatan vs Target
             </span>
             <div className="w-8 h-8 rounded-full bg-[#E8F8EE] text-[#00875A] flex items-center justify-center shrink-0">
               <Banknote size={16} />
             </div>
           </div>
 
-          {/* Middle Row: Big Bold Navy Number */}
           <div className="my-2">
             <span className="text-[32px] font-black text-[#0F172A] leading-none tracking-tight font-roboto">
-              96,2%
+              {mockKpiTopCards[2].value}
             </span>
           </div>
 
-          {/* Bottom Row: Subtitle Text */}
           <div className="text-[11px] font-medium text-[#64748B]">
-            Rata-rata capaian 34 P3DW s.d. Oktober
+            Rata-rata 34 P3DW s.d. Oktober
           </div>
         </div>
 
-        {/* Card 4: Retur / Unit Perlu Perhatian (White Card + Red Bold Stat & Red Subtitle) */}
+        {/* Card 4: Unit Perlu Perhatian (Box 1) */}
         <div className="bg-white rounded-2xl p-5 border border-[#E5E7EB] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow min-h-[140px]">
-          {/* Top Row: Label & Red Icon Badge */}
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-[#64748B] uppercase font-roboto">
               UNIT PERLU PERHATIAN
@@ -277,19 +324,17 @@ export const BerandaDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Middle Row: Big Bold Red Number */}
           <div className="my-2">
             <div className="flex items-baseline gap-1.5">
               <span className="text-[32px] font-black text-[#E53935] leading-none tracking-tight font-roboto">
-                4
+                {mockKpiTopCards[3].value}
               </span>
               <span className="text-[13px] font-semibold text-[#E53935]/80">P3DW</span>
             </div>
           </div>
 
-          {/* Bottom Row: Red Warning Subtitle */}
           <div className="text-[11px] font-semibold text-[#E53935]">
-            Berada di Box 1 (Priority Improvement)
+            Box 1 (Priority Improvement: Y &lt; 90, X &lt; 85)
           </div>
         </div>
       </section>
@@ -299,115 +344,188 @@ export const BerandaDashboardPage: React.FC = () => {
         {/* Kolom Kiri: Matriks Kinerja dan Potensial (ScatterChart) */}
         <div className="bg-white rounded-xl p-6 border border-[#E0E0E0] shadow-sm flex flex-col justify-between">
           <div>
-            {/* Header: Title (Tanpa Box Dropdown 9 Kuadran) */}
-            <div className="mb-4">
-              <h3 className="text-[16px] font-semibold text-[#212121]">
-                Matriks Kinerja dan Potensial
-              </h3>
-              <p className="text-[12px] text-[#757575] mt-0.5 font-normal">
-                Posisi 34 P3DW. Kinerja = Kemandirian Keuangan Daerah (55%, KPI 1–9). Potensi = Kualitas Pelayanan Publik (45%, KPI 10–18). Pilih titik untuk melihat unit.
-              </p>
+            {/* Header: Title & Panduan Button Sesuai yang Ada di Detail */}
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-[16px] font-semibold text-[#212121] dark:text-[#F8FAFC]">
+                  Matriks Kinerja dan Potensial (9-Box Talent Box)
+                </h3>
+                <p className="text-[12px] text-[#757575] dark:text-[#94A3B8] mt-0.5 font-normal">
+                  Posisi 34 P3DW. Sumbu Y Kinerja = Kemandirian Keuangan (55%, KPI 1–9). Sumbu X Potensi = Pelayanan Publik (45%, KPI 10–18).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenBoxExplanation(selectedUnit.boxNumber || 9)}
+                className="text-[11px] font-medium text-[#00875A] hover:text-[#006644] hover:underline inline-flex items-center gap-1 cursor-pointer shrink-0 py-1 px-2.5 rounded-lg bg-[#E6F4EA]/70 hover:bg-[#E6F4EA] transition"
+                title="Lihat penjelasan dan panduan untuk tiap box"
+              >
+                <HelpCircle size={13} />
+                <span>Panduan</span>
+              </button>
             </div>
 
-            {/* 9-Box Matrix Grid with Axis Labels & Ticks */}
+            {/* 9-Box Matrix Grid with Axis Labels & Ticks (Skala Baku: Y: 60..120 [Cutoffs 90, 100], X: 60..120 [Cutoffs 85, 95]) */}
             <div className="flex items-start select-none">
               {/* Y-Axis Label & Ticks */}
               <div className="flex items-center mr-2 shrink-0 self-stretch">
                 {/* Vertical Rotated Axis Label */}
                 <div className="flex items-center justify-center w-6 mr-1">
                   <span className="text-[11px] font-bold text-[#1E293B] tracking-wider whitespace-nowrap -rotate-90 select-none">
-                    KINERJA (KEMANDIRIAN KEUANGAN)
+                    SUMBU Y – KINERJA (55%)
                   </span>
                 </div>
-                {/* Y-Axis Ticks (100, 80, 60, 40) */}
-                <div className="relative h-[310px] w-7 text-right pr-1.5 text-[11px] font-medium text-[#64748B] select-none">
-                  <span className="absolute right-1.5 top-0 -translate-y-1/2">100</span>
-                  <span className="absolute right-1.5 top-1/3 -translate-y-1/2">80</span>
-                  <span className="absolute right-1.5 top-2/3 -translate-y-1/2">60</span>
-                  <span className="absolute right-1.5 bottom-0 translate-y-1/2">40</span>
+                {/* Y-Axis Ticks (120, 100, 90, 60) */}
+                <div className="relative h-[310px] w-8 text-right pr-1.5 text-[11px] font-medium text-[#64748B] select-none">
+                  <span className="absolute right-1.5 top-0 -translate-y-1/2">120</span>
+                  <span className="absolute right-1.5 top-1/3 -translate-y-1/2 font-bold text-[#00875A]" title="Batas Kinerja Tinggi (≥ 100)">100</span>
+                  <span className="absolute right-1.5 top-2/3 -translate-y-1/2 font-bold text-[#D97706]" title="Batas Kinerja Sedang (90–99.9)">90</span>
+                  <span className="absolute right-1.5 bottom-0 translate-y-1/2">60</span>
                 </div>
               </div>
 
               {/* Matrix + X-Axis Container */}
               <div className="flex-1 min-w-0">
-                {/* 9-Box Matrix Grid (Warna Box & Dot Sesuai Gambar Referensi Kedua) */}
-                <div className="w-full h-[310px] relative rounded-lg border border-[#E2E8F0] select-none bg-white shadow-inner">
-                  {/* 3x3 Grid Background Boxes Sesuai Gambar Referensi Kedua */}
+                {/* 9-Box Matrix Grid */}
+                <div className="w-full h-[310px] relative rounded-lg border border-[#CBD5E1] select-none bg-white shadow-inner">
+                  {/* 3x3 Grid Background Boxes */}
                   <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 rounded-lg overflow-hidden">
                     {/* Row 1 (Top): Box 7, Box 8, Box 9 */}
                     {/* Box 7 */}
-                    <div className="bg-[#F8FAFC] border-r border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start">
-                      <span className="text-[12px] font-bold text-[#1E293B]">Box 7</span>
+                    <div
+                      onClick={() => handleOpenBoxExplanation(7)}
+                      className="bg-[#F8FAFC] border-r border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start cursor-pointer hover:bg-slate-100/70 transition-colors group"
+                      title="Klik untuk panduan Box 7 (Maintain)"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-[#1E293B] group-hover:text-[#00875A] transition-colors">Box 7</span>
+                        <HelpCircle size={12} className="text-[#64748B] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <span className="text-[10px] text-[#64748B] leading-tight mt-0.5 font-normal">
-                        Hasil tinggi, pendorong rapuh
+                        Maintain
                       </span>
                     </div>
                     {/* Box 8 */}
-                    <div className="bg-[#F8FAFC] border-r border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start">
-                      <span className="text-[12px] font-bold text-[#1E293B]">Box 8</span>
+                    <div
+                      onClick={() => handleOpenBoxExplanation(8)}
+                      className="bg-[#F8FAFC] border-r border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start cursor-pointer hover:bg-slate-100/70 transition-colors group"
+                      title="Klik untuk panduan Box 8 (Strategic Contributor)"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-[#1E293B] group-hover:text-[#00875A] transition-colors">Box 8</span>
+                        <HelpCircle size={12} className="text-[#64748B] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <span className="text-[10px] text-[#64748B] leading-tight mt-0.5 font-normal">
-                        Hasil unggul
+                        Strategic Contributor
                       </span>
                     </div>
                     {/* Box 9 */}
-                    <div className="bg-[#E6F4FF] border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start">
-                      <span className="text-[12px] font-bold text-[#0066CC]">Box 9</span>
-                      <span className="text-[10px] text-[#0284C7] leading-tight mt-0.5 font-normal">
-                        Unggul penuh
+                    <div
+                      onClick={() => handleOpenBoxExplanation(9)}
+                      className="bg-[#E6F4FF] border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start cursor-pointer hover:bg-[#D8EDFF] transition-colors group"
+                      title="Klik untuk panduan Box 9 (Kapus of the Month)"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-[#0066CC]">Box 9</span>
+                        <HelpCircle size={12} className="text-[#0284C7] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-[10px] text-[#0284C7] leading-tight mt-0.5 font-semibold">
+                        Kapus of the Month 🏆
                       </span>
                     </div>
 
                     {/* Row 2 (Middle): Box 4, Box 5, Box 6 */}
                     {/* Box 4 */}
-                    <div className="bg-[#FFF0F2] border-r border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start">
-                      <span className="text-[12px] font-bold text-[#B91C1C]">Box 4</span>
+                    <div
+                      onClick={() => handleOpenBoxExplanation(4)}
+                      className="bg-[#FFF0F2] border-r border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start cursor-pointer hover:bg-[#FFE4E8] transition-colors group"
+                      title="Klik untuk panduan Box 4 (Develop)"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-[#B91C1C]">Box 4</span>
+                        <HelpCircle size={12} className="text-[#B91C1C] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <span className="text-[10px] text-[#991B1B] leading-tight mt-0.5 font-normal">
-                        Pendorong lemah
+                        Develop
                       </span>
                     </div>
                     {/* Box 5 */}
-                    <div className="bg-[#FFFDEB] border-r border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start">
-                      <span className="text-[12px] font-bold text-[#B45309]">Box 5</span>
+                    <div
+                      onClick={() => handleOpenBoxExplanation(5)}
+                      className="bg-[#FFFDEB] border-r border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start cursor-pointer hover:bg-[#FEF9C3] transition-colors group"
+                      title="Klik untuk panduan Box 5 (Core Contributor)"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-[#B45309]">Box 5</span>
+                        <HelpCircle size={12} className="text-[#B45309] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <span className="text-[10px] text-[#92400E] leading-tight mt-0.5 font-normal">
-                        Inti
+                        Core Contributor
                       </span>
                     </div>
                     {/* Box 6 */}
-                    <div className="bg-[#ECFDF5] border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start">
-                      <span className="text-[12px] font-bold text-[#00875A]">Box 6</span>
+                    <div
+                      onClick={() => handleOpenBoxExplanation(6)}
+                      className="bg-[#ECFDF5] border-b border-[#E2E8F0] p-2.5 flex flex-col justify-start cursor-pointer hover:bg-[#D1FAE5] transition-colors group"
+                      title="Klik untuk panduan Box 6 (Growth Potential)"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-[#00875A]">Box 6</span>
+                        <HelpCircle size={12} className="text-[#00875A] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <span className="text-[10px] text-[#047857] leading-tight mt-0.5 font-normal">
-                        Pendorong kuat
+                        Growth Potential
                       </span>
                     </div>
 
                     {/* Row 3 (Bottom): Box 1, Box 2, Box 3 */}
                     {/* Box 1 */}
-                    <div className="bg-[#FFF0F2] border-r border-[#E2E8F0] p-2.5 flex flex-col justify-start">
-                      <span className="text-[12px] font-bold text-[#B91C1C]">Box 1</span>
+                    <div
+                      onClick={() => handleOpenBoxExplanation(1)}
+                      className="bg-[#FFF0F2] border-r border-[#E2E8F0] p-2.5 flex flex-col justify-start cursor-pointer hover:bg-[#FFE4E8] transition-colors group"
+                      title="Klik untuk panduan Box 1 (Priority Improvement)"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-[#B91C1C]">Box 1</span>
+                        <HelpCircle size={12} className="text-[#B91C1C] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <span className="text-[10px] text-[#991B1B] leading-tight mt-0.5 font-normal">
-                        Perlu pembinaan
+                        Priority Improvement
                       </span>
                     </div>
                     {/* Box 2 */}
-                    <div className="bg-[#FEF3C7] border-r border-[#E2E8F0] p-2.5 flex flex-col justify-start">
-                      <span className="text-[12px] font-bold text-[#B45309]">Box 2</span>
+                    <div
+                      onClick={() => handleOpenBoxExplanation(2)}
+                      className="bg-[#FEF3C7] border-r border-[#E2E8F0] p-2.5 flex flex-col justify-start cursor-pointer hover:bg-[#FDE68A] transition-colors group"
+                      title="Klik untuk panduan Box 2 (Monitor)"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-[#B45309]">Box 2</span>
+                        <HelpCircle size={12} className="text-[#B45309] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <span className="text-[10px] text-[#92400E] leading-tight mt-0.5 font-normal">
-                        Hasil tertinggal
+                        Monitor
                       </span>
                     </div>
                     {/* Box 3 */}
-                    <div className="bg-[#F8FAFC] p-2.5 flex flex-col justify-start">
-                      <span className="text-[12px] font-bold text-[#1E293B]">Box 3</span>
+                    <div
+                      onClick={() => handleOpenBoxExplanation(3)}
+                      className="bg-[#F8FAFC] p-2.5 flex flex-col justify-start cursor-pointer hover:bg-slate-100/70 transition-colors group"
+                      title="Klik untuk panduan Box 3 (Potential Developee)"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-[#1E293B] group-hover:text-[#00875A] transition-colors">Box 3</span>
+                        <HelpCircle size={12} className="text-[#64748B] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <span className="text-[10px] text-[#64748B] leading-tight mt-0.5 font-normal">
-                        Pendorong kuat, hasil belum terlihat
+                        Potential Developee
                       </span>
                     </div>
                   </div>
 
-                  {/* Scatter Points Overlay (Matching Gambar Pertama dengan Titik Terpilih Sesuai Gambar Kedua) */}
+                  {/* Scatter Points Overlay (100% Sesuai Aturan Koordinat & Batas Potensi/Kinerja) */}
                   {mockScatterData.map((item) => {
-                    const posX = `${Math.min(94, Math.max(6, ((item.x - 40) / 60) * 100))}%`;
-                    const posY = `${Math.min(94, Math.max(6, (1 - (item.y - 40) / 60) * 100))}%`;
+                    const { left, top } = getGridCoordinates(item.x, item.y);
                     const isSelected = selectedUnit.id === item.id;
                     const isHovered = hoveredUnit?.id === item.id;
                     const dotColor = getPointColor(item.kategori);
@@ -420,8 +538,8 @@ export const BerandaDashboardPage: React.FC = () => {
                         onMouseLeave={() => setHoveredUnit(null)}
                         className="absolute cursor-pointer transition-transform duration-150"
                         style={{
-                          left: posX,
-                          top: posY,
+                          left,
+                          top,
                           transform: 'translate(-50%, -50%)',
                           zIndex: isSelected ? 5 : 2,
                         }}
@@ -445,40 +563,46 @@ export const BerandaDashboardPage: React.FC = () => {
                     );
                   })}
 
-                  {/* Floating Tooltip saat Hover Point (Card Putih Premium & Anti-Clipping) */}
+                  {/* Floating Tooltip saat Hover Point (Card Putih Premium dengan Indikator Kinerja & Potensi) */}
                   {hoveredUnit && (() => {
-                    const rawX = ((hoveredUnit.x - 40) / 60) * 100;
-                    const rawY = (1 - (hoveredUnit.y - 40) / 60) * 100;
-                    const isTopHalf = rawY < 45;
-                    const isRightHalf = rawX > 60;
+                    const { left, top } = getGridCoordinates(hoveredUnit.x, hoveredUnit.y);
+                    const leftNum = parseFloat(left);
+                    const topNum = parseFloat(top);
+                    const isTopHalf = topNum < 45;
+                    const isRightHalf = leftNum > 60;
 
                     return (
                       <div
-                        className={`absolute pointer-events-none z-10 bg-white text-[#0F172A] rounded-[14px] p-3 shadow-xl shadow-black/15 border border-[#E2E8F0] font-roboto min-w-[185px] transition-all ${isTopHalf ? 'translate-y-3' : '-translate-y-full -mt-2'
-                          } ${isRightHalf ? '-translate-x-[85%]' : rawX < 35 ? '-translate-x-[15%]' : '-translate-x-1/2'}`}
+                        className={`absolute pointer-events-none z-20 bg-white text-[#0F172A] rounded-[14px] p-3 shadow-xl shadow-black/15 border border-[#E2E8F0] font-roboto min-w-[210px] transition-all ${isTopHalf ? 'translate-y-3' : '-translate-y-full -mt-2'
+                          } ${isRightHalf ? '-translate-x-[85%]' : leftNum < 35 ? '-translate-x-[15%]' : '-translate-x-1/2'}`}
                         style={{
-                          left: `${Math.min(94, Math.max(6, rawX))}%`,
-                          top: `${Math.min(94, Math.max(6, rawY))}%`,
+                          left,
+                          top,
                         }}
                       >
                         <div className="font-bold text-[#0F172A] text-[13px] leading-snug">
                           {hoveredUnit.nama}
                         </div>
-                        <div className="text-[#64748B] text-[11px] mt-0.5 font-normal">
-                          {hoveredUnit.korwil || 'Korwil II'} • {hoveredUnit.box}
+                        <div className="text-[#64748B] text-[11px] mt-0.5 font-medium flex items-center gap-1">
+                          <span>{hoveredUnit.korwil || 'Korwil II'}</span>
+                          <span>•</span>
+                          <span className="font-bold text-[#00875A]">{hoveredUnit.box}</span>
                         </div>
                         <div className="mt-2.5 pt-2 border-t border-[#F1F5F9] grid grid-cols-3 gap-2 text-left">
                           <div>
-                            <div className="text-[10px] font-medium text-[#64748B]">Kinerja:</div>
+                            <div className="text-[10px] font-medium text-[#64748B]">Kinerja (Y):</div>
                             <div className="text-[13px] font-bold text-[#00875A] leading-tight">{hoveredUnit.y}</div>
+                            <div className="text-[9px] text-[#64748B]">{hoveredUnit.kinerjaLevel}</div>
                           </div>
                           <div>
-                            <div className="text-[10px] font-medium text-[#64748B]">Potensi:</div>
+                            <div className="text-[10px] font-medium text-[#64748B]">Potensi (X):</div>
                             <div className="text-[13px] font-bold text-[#0284c7] leading-tight">{hoveredUnit.x}</div>
+                            <div className="text-[9px] text-[#64748B]">{hoveredUnit.potensiLevel}</div>
                           </div>
                           <div>
-                            <div className="text-[10px] font-medium text-[#64748B]">Skor:</div>
+                            <div className="text-[10px] font-medium text-[#64748B]">Skor Akhir:</div>
                             <div className="text-[13px] font-bold text-[#D97706] leading-tight">{hoveredUnit.skorTotal.toFixed(1)}</div>
+                            <div className="text-[9px] text-[#00875A] font-semibold">{hoveredUnit.kategori}</div>
                           </div>
                         </div>
                       </div>
@@ -486,18 +610,18 @@ export const BerandaDashboardPage: React.FC = () => {
                   })()}
                 </div>
 
-                {/* X-Axis Ticks (40, 60, 80, 100) */}
+                {/* X-Axis Ticks (60, 85, 95, 120 sesuai ambang batas dokumen) */}
                 <div className="relative w-full h-4 mt-1.5 text-[11px] font-medium text-[#64748B] select-none">
-                  <span className="absolute left-0 -translate-x-1/2">40</span>
-                  <span className="absolute left-1/3 -translate-x-1/2">60</span>
-                  <span className="absolute left-2/3 -translate-x-1/2">80</span>
-                  <span className="absolute right-0 translate-x-1/2">100</span>
+                  <span className="absolute left-0 -translate-x-1/2">60</span>
+                  <span className="absolute left-1/3 -translate-x-1/2 font-bold text-[#D97706]" title="Batas Potensi Sedang (85–94.9)">85</span>
+                  <span className="absolute left-2/3 -translate-x-1/2 font-bold text-[#00875A]" title="Batas Potensi Tinggi (≥ 95)">95</span>
+                  <span className="absolute right-0 translate-x-1/2">120</span>
                 </div>
 
                 {/* X-Axis Label */}
                 <div className="text-center mt-2">
                   <span className="text-[11px] font-bold text-[#1E293B] tracking-wider select-none">
-                    POTENSI (KUALITAS PELAYANAN PUBLIK)
+                    SUMBU X – POTENSI (45%)
                   </span>
                 </div>
               </div>
@@ -535,8 +659,12 @@ export const BerandaDashboardPage: React.FC = () => {
               <div className="text-[15px] font-semibold text-[#212121] dark:text-[#F8FAFC] mt-0.5">
                 {selectedUnit.nama}
               </div>
-              <div className="text-[12px] text-[#757575] dark:text-[#94A3B8] mt-0.5">
-                {selectedUnit.box} • Kinerja: <strong className="text-[#212121] dark:text-[#F8FAFC]">{selectedUnit.y}</strong> • Potensi: <strong className="text-[#212121] dark:text-[#F8FAFC]">{selectedUnit.x}</strong>
+              <div className="text-[12px] text-[#757575] dark:text-[#94A3B8] mt-0.5 flex items-center gap-2 flex-wrap">
+                <span className="font-medium text-[#1E293B] dark:text-[#F8FAFC]">{selectedUnit.box}</span>
+                <span>•</span>
+                <span>Kinerja: <strong className="text-[#212121] dark:text-[#F8FAFC]">{selectedUnit.y}</strong></span>
+                <span>•</span>
+                <span>Potensi: <strong className="text-[#212121] dark:text-[#F8FAFC]">{selectedUnit.x}</strong></span>
               </div>
             </div>
 
@@ -649,179 +777,194 @@ export const BerandaDashboardPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. BOTTOM SECTION: Leaderboard & Komparasi Area (Header Tabel Gambar 3 + Button & Pagination Gambar 4 + InputField Gambar 5) */}
+      {/* 3. LEADERBOARD & KOMPARASI AREA (Sesuai Referensi Gambar) */}
       <section className="bg-white dark:bg-[#1E293B] rounded-xl p-6 border border-[#E0E0E0] dark:border-[#334155] shadow-sm">
-        {/* Table Controls (Menggunakan InputField Design Gambar 5) */}
+        {/* Header: Title, Keterangan Warna, & Filter Controls */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-5">
           <div>
             <h3 className="text-[18px] font-semibold text-[#212121] dark:text-[#F8FAFC]">
-              Leaderboard & Komparasi Area
+              Leaderboard &amp; Komparasi Area
             </h3>
-            {/* Keterangan Warna */}
-            <div className="flex items-center gap-3 mt-1 text-[12px] text-[#757575] dark:text-[#94A3B8]">
-              <span className="font-medium text-[#424242] dark:text-[#CBD5E1]">Keterangan Warna:</span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#00875A]" /> Kinerja Kuat (A)
+
+            {/* Keterangan Warna Sesuai Gambar Referensi (Kinerja Kuat A, Sedang B, Kurang C/D) */}
+            <div className="flex items-center gap-3.5 mt-1.5 text-[12px] text-[#616161] dark:text-[#94A3B8] flex-wrap">
+              <span className="text-[#424242] dark:text-[#E2E8F0] font-bold">Keterangan Warna:</span>
+              <span className="flex items-center gap-1.5 text-[#616161] dark:text-[#CBD5E1]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#52C41A] inline-block shrink-0" /> Kinerja Kuat (A)
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#FF8F00]" /> Sedang (B)
+              <span className="flex items-center gap-1.5 text-[#616161] dark:text-[#CBD5E1]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FADB14] inline-block shrink-0" /> Sedang (B)
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#E53935]" /> Kurang (C/D)
+              <span className="flex items-center gap-1.5 text-[#616161] dark:text-[#CBD5E1]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FF7875] inline-block shrink-0" /> Kurang (C/D)
               </span>
             </div>
           </div>
 
-          {/* Form InputFields & CustomSelect Dropdowns (Sesuai Desain Sistem: h-[44px], rounded-[12px], Roboto 14px) */}
+          {/* Form Controls: Pencarian (Sesuai Gambar Referensi Kedua), Klaster, Kanwil */}
           <div className="flex flex-wrap items-end gap-3 w-full lg:w-auto">
-            {/* Search InputField */}
-            <div className="relative flex-1 sm:w-64">
-              <span className="text-[14px] font-medium text-[#212121] dark:text-[#F8FAFC] mb-1.5 block leading-none font-roboto">
+            {/* Input Pencarian Sesuai Desain Sistem (Gambar Referensi ke-2: Rounded-12px & Tombol Hijau Squircle) */}
+            <div className="flex flex-col">
+              <span className="text-[14px] font-medium text-[#212121] dark:text-[#F8FAFC] mb-1.5 leading-none">
                 Pencarian:
               </span>
-              <SearchBar
-                placeholder="Pencarian"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full"
-              />
+              <div className="flex items-center w-56 sm:w-64 h-[44px] pl-4 pr-1.5 bg-white dark:bg-[#0F172A] border border-[#E0E0E0] dark:border-[#334155] rounded-[12px] shadow-2xs focus-within:border-[#00875A] focus-within:ring-1 focus-within:ring-[#00875A] transition-all">
+                <input
+                  type="text"
+                  placeholder="Pencarian"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent border-none outline-none text-[14px] text-[#212121] dark:text-[#F8FAFC] placeholder:text-[#757575] dark:placeholder:text-[#94A3B8]"
+                />
+                <button
+                  type="button"
+                  className="w-[36px] h-[36px] rounded-[10px] bg-[#00875A] hover:bg-[#00724C] text-white flex items-center justify-center shrink-0 ml-1.5 transition cursor-pointer active:scale-95 shadow-xs"
+                  title="Cari"
+                >
+                  <Search size={18} className="stroke-[2.5]" />
+                </button>
+              </div>
             </div>
 
-            {/* Filter Klaster CustomSelect */}
+            {/* Klaster Select */}
             <CustomSelect
               label="Klaster:"
               value={filterKlaster}
               options={klasterOptions}
-              onChange={(val) => {
-                setFilterKlaster(val);
-                setCurrentPage(1);
-              }}
-              className="w-44"
+              onChange={(val) => setFilterKlaster(val)}
+              className="w-36 sm:w-40"
             />
 
-            {/* Filter Kanwil CustomSelect */}
+            {/* Korwil Select (Sesuai Permintaan User: Nama Filter 'Korwil' & Opsi 'Semua Korwil') */}
             <CustomSelect
-              label="Kanwil:"
-              value={filterKanwil}
-              options={kanwilOptions}
-              onChange={(val) => {
-                setFilterKanwil(val);
-                setCurrentPage(1);
-              }}
-              className="w-44"
+              label="Korwil:"
+              value={filterKorwil}
+              options={korwilOptions}
+              onChange={(val) => setFilterKorwil(val)}
+              className="w-44 sm:w-48"
             />
           </div>
         </div>
 
-        {/* TABEL DENGAN HEADER HIJAU & PAGINATION TERPADU (SESUAI GAMBAR REFERENSI) */}
+        {/* Tabel Data (Header Hijau Sesuai Gambar 1 & Style Sebelumnya) */}
         <div className="rounded-xl border border-[#E0E0E0] dark:border-[#334155] shadow-sm overflow-hidden bg-white dark:bg-[#1E293B]">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse font-roboto">
-              {/* Header Tabel: Solid Green #00875A dengan Divider Garis Putih Vertikal */}
-              <thead className="bg-[#00875A] text-white text-[12px] font-medium tracking-wide">
+              <thead className="bg-[#00875A] text-white text-[12px] font-semibold tracking-wide">
                 <tr>
-                  <th className="py-3.5 px-4 w-16 text-center border-r border-white/20">
+                  <th className="py-3.5 px-3 w-16 text-center border-r border-white/20">
                     PERINGKAT
                   </th>
-                  <th className="py-3.5 px-4 border-r border-white/20 min-w-[200px]">
+                  <th className="py-3.5 px-4 text-left border-r border-white/20 min-w-[220px]">
                     NAMA P3DW
                   </th>
-                  <th className="py-3.5 px-4 text-center border-r border-white/20">
+                  <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
                     TOTAL SKOR
                   </th>
-                  <th className="py-3.5 px-4 text-center border-r border-white/20">
+                  <th className="py-3.5 px-3 text-center border-r border-white/20">
                     PREDIKAT
                   </th>
-                  <th className="py-3.5 px-3 text-center border-r border-white/20">
-                    A (40%)
+                  <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
+                    A (35%)
                   </th>
-                  <th className="py-3.5 px-3 text-center border-r border-white/20">
+                  <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
                     B (20%)
                   </th>
-                  <th className="py-3.5 px-3 text-center border-r border-white/20">
-                    C (20%)
+                  <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
+                    C (25%)
                   </th>
-                  <th className="py-3.5 px-3 text-center border-r border-white/20">
-                    D (10%)
+                  <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
+                    D (5%)
                   </th>
-                  <th className="py-3.5 px-3 text-center border-r border-white/20">
-                    E (10%)
+                  <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
+                    E (15%)
                   </th>
                   <th className="py-3.5 px-4 text-center">
                     AKSI
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E0E0E0] dark:divide-[#334155] bg-white dark:bg-[#1E293B] text-[13px]">
-                {paginatedLeaderboard.length > 0 ? (
-                  paginatedLeaderboard.map((row) => (
-                    <tr key={row.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#334155]/30 transition-colors border-b border-[#E0E0E0] dark:border-[#334155] last:border-b-0">
-                      <td className="py-3.5 px-4 font-semibold text-center text-[#212121] dark:text-[#F8FAFC] border-r border-[#E0E0E0] dark:border-[#334155]">
+              <tbody className="divide-y divide-[#E0E0E0] dark:divide-[#334155] text-[13px]">
+                {displayedLeaderboard.length > 0 ? (
+                  displayedLeaderboard.map((row) => (
+                    <tr
+                      key={row.id}
+                      className={`transition-colors border-b border-[#E0E0E0]/60 dark:border-[#334155] ${getRowBgColor(
+                        row.grade,
+                        row.predikat,
+                        selectedUnit.nama === row.namaP3dw
+                      )}`}
+                    >
+                      <td className="py-3 px-3 font-bold text-center text-[#1E293B] dark:text-[#F8FAFC] border-r border-[#E0E0E0]/60 dark:border-[#334155]">
                         #{row.peringkat}
                       </td>
-                      <td className="py-3.5 px-4 border-r border-[#E0E0E0] dark:border-[#334155]">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-lg bg-[#E6F4EA] dark:bg-[#00875A]/25 text-[#00875A] dark:text-[#34D399] flex items-center justify-center font-bold text-[10px] shrink-0">
-                            <Building2 size={14} />
+                      <td className="py-3 px-4 border-r border-[#E0E0E0]/60 dark:border-[#334155]">
+                        <div>
+                          <div
+                            className="font-bold text-[13px] text-[#1E293B] dark:text-[#F8FAFC] hover:text-[#00875A] cursor-pointer transition-colors leading-snug"
+                            onClick={() => handleSelectBranch(row.namaP3dw)}
+                          >
+                            {row.namaP3dw}
                           </div>
-                          <div>
-                            <div className="font-medium text-[#212121] dark:text-[#F8FAFC]">{row.namaP3dw}</div>
-                            <div className="text-[11px] text-[#757575] dark:text-[#94A3B8]">{row.kanwil}</div>
+                          <div className="text-[11px] text-[#64748B] dark:text-[#94A3B8] font-normal leading-snug mt-0.5">
+                            {row.kanwil}
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 font-semibold text-center text-[#212121] dark:text-[#F8FAFC] border-r border-[#E0E0E0] dark:border-[#334155]">
-                        {row.totalSkor.toFixed(1)}
+                      <td className="py-3 px-3 font-bold text-center text-[#1E293B] dark:text-[#F8FAFC] border-r border-[#E0E0E0]/60 dark:border-[#334155]">
+                        {row.totalSkor.toFixed(1).replace('.', ',')}
                       </td>
-                      <td className="py-3.5 px-4 text-center border-r border-[#E0E0E0] dark:border-[#334155]">
+                      <td className="py-3 px-3 text-center border-r border-[#E0E0E0]/60 dark:border-[#334155]">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full font-medium text-[11px] ${row.predikat === 'A'
-                            ? 'bg-[#E6F4EA] dark:bg-[#00875A]/20 text-[#00875A] dark:text-[#34D399]'
-                            : row.predikat === 'B'
-                              ? 'bg-[#E3F2FD] dark:bg-[#0284C7]/20 text-[#0D47A1] dark:text-[#38BDF8]'
-                              : row.predikat === 'C'
-                                ? 'bg-[#FFF8E1] dark:bg-[#D97706]/20 text-[#FF8F00] dark:text-[#FBBF24]'
-                                : 'bg-[#FFEBEE] dark:bg-[#DC2626]/20 text-[#E53935] dark:text-[#F87171]'
-                            }`}
+                          className={`px-3 py-0.5 rounded-full text-[12px] font-medium whitespace-nowrap inline-flex items-center gap-1 shadow-2xs ${getPredikatBadgeStyle(
+                            row.predikat
+                          )}`}
                         >
-                          {row.predikat}
+                          <span>{row.predikat}</span>
+                          <span className="opacity-75 text-[11px]">({row.grade || (row.predikat.includes('Sangat') ? 'A' : row.predikat.includes('Baik') ? 'B' : 'C')})</span>
                         </span>
                       </td>
-                      <td className={`py-3.5 px-3 text-center border-r border-[#E0E0E0] dark:border-[#334155] ${getScoreTextColor(row.scoreA)}`}>
-                        {row.scoreA}
+                      <td className="py-3 px-3 text-center border-r border-[#E0E0E0]/60 dark:border-[#334155]">
+                        <span className={`font-semibold text-[13px] ${getScoreTextColor(row.scorePendapatan)}`}>
+                          {Math.round(row.scorePendapatan)}
+                        </span>
                       </td>
-                      <td className={`py-3.5 px-3 text-center border-r border-[#E0E0E0] dark:border-[#334155] ${getScoreTextColor(row.scoreB)}`}>
-                        {row.scoreB}
+                      <td className="py-3 px-3 text-center border-r border-[#E0E0E0]/60 dark:border-[#334155]">
+                        <span className={`font-semibold text-[13px] ${getScoreTextColor(row.scoreKepatuhan)}`}>
+                          {Math.round(row.scoreKepatuhan)}
+                        </span>
                       </td>
-                      <td className={`py-3.5 px-3 text-center border-r border-[#E0E0E0] dark:border-[#334155] ${getScoreTextColor(row.scoreC)}`}>
-                        {row.scoreC}
+                      <td className="py-3 px-3 text-center border-r border-[#E0E0E0]/60 dark:border-[#334155]">
+                        <span className={`font-semibold text-[13px] ${getScoreTextColor(row.scorePelayanan)}`}>
+                          {Math.round(row.scorePelayanan)}
+                        </span>
                       </td>
-                      <td className={`py-3.5 px-3 text-center border-r border-[#E0E0E0] dark:border-[#334155] ${getScoreTextColor(row.scoreD)}`}>
-                        {row.scoreD}
+                      <td className="py-3 px-3 text-center border-r border-[#E0E0E0]/60 dark:border-[#334155]">
+                        <span className={`font-semibold text-[13px] ${getScoreTextColor(row.scoreTataKelola)}`}>
+                          {Math.round(row.scoreTataKelola)}
+                        </span>
                       </td>
-                      <td className={`py-3.5 px-3 text-center border-r border-[#E0E0E0] dark:border-[#334155] ${getScoreTextColor(row.scoreE)}`}>
-                        {row.scoreE}
+                      <td className="py-3 px-3 text-center border-r border-[#E0E0E0]/60 dark:border-[#334155]">
+                        <span className={`font-semibold text-[13px] ${getScoreTextColor(row.scoreSdm)}`}>
+                          {Math.round(row.scoreSdm)}
+                        </span>
                       </td>
-                      <td className="py-3.5 px-4 text-center">
-                        {/* BUTTON DETAIL DENGAN WARNA BG SOLID HIJAU (SESUAI REQUEST USER) */}
+                      <td className="py-3 px-4 text-center">
                         <button
                           type="button"
                           onClick={() => navigate(`/beranda/detail-analisis?id=${row.id}`)}
-                          className="inline-flex items-center gap-1.5 text-[12px] font-medium bg-[#00875A] hover:bg-[#00724C] text-white px-3.5 py-1.5 rounded-lg transition shadow-xs cursor-pointer active:scale-95"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00875A] hover:bg-[#00724C] text-white text-[12px] font-medium transition cursor-pointer shadow-xs active:scale-95"
                         >
                           <span>Detail</span>
-                          <ArrowUpRight size={13} className="stroke-[2.5]" />
+                          <ArrowUpRight size={14} className="stroke-[2.5]" />
                         </button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={10} className="py-8 text-center text-[#757575] dark:text-[#94A3B8] text-[13px]">
-                      Tidak ada data yang sesuai dengan filter.
+                    <td colSpan={10} className="py-10 text-center text-[#64748B] dark:text-[#94A3B8] text-[13px]">
+                      Tidak ada data yang sesuai dengan filter atau pencarian.
                     </td>
                   </tr>
                 )}
@@ -829,88 +972,35 @@ export const BerandaDashboardPage: React.FC = () => {
             </table>
           </div>
 
-          {/* Pagination Footer Row (Merged dengan Tabel Sesuai Gambar Referensi Pertama) */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 bg-[#F8FAFC] dark:!bg-[#1E293B] border-t border-[#E0E0E0] dark:border-[#334155] text-[12px] text-[#475569] dark:text-[#94A3B8] font-roboto select-none">
-            {/* Kiri: Tampilkan [ 10 ⌄ ] Item | dari total 12 */}
-            <div className="flex items-center gap-2">
-              <span>Tampilkan</span>
-              <div className="relative inline-flex items-center">
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="appearance-none bg-white dark:!bg-[#0F172A] border border-[#CBD5E1] dark:border-[#334155] hover:border-[#00875A] dark:hover:border-[#00875A] rounded-lg px-2.5 py-1 pr-6 text-[12px] font-medium text-[#1E293B] dark:text-[#F8FAFC] cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#00875A] transition shadow-xs"
-                >
-                  <option value={5} className="dark:bg-[#0F172A] dark:text-[#F8FAFC]">5</option>
-                  <option value={10} className="dark:bg-[#0F172A] dark:text-[#F8FAFC]">10</option>
-                  <option value={20} className="dark:bg-[#0F172A] dark:text-[#F8FAFC]">20</option>
-                  <option value={50} className="dark:bg-[#0F172A] dark:text-[#F8FAFC]">50</option>
-                </select>
-                <ChevronDown
-                  size={13}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#00875A]"
-                />
-              </div>
-              <span>Item</span>
-              <span className="text-[#CBD5E1] dark:text-[#475569] mx-1">|</span>
-              <span>
-                dari total <strong className="font-bold text-[#1E293B] dark:text-[#F8FAFC]">{filteredLeaderboard.length}</strong>
-              </span>
-            </div>
-
-            {/* Kanan: Halaman [ 1 ⌄ ] dari 2  [ < | > ] */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span>Halaman</span>
-                <div className="relative inline-flex items-center">
-                  <select
-                    value={currentPage}
-                    onChange={(e) => setCurrentPage(Number(e.target.value))}
-                    className="appearance-none bg-white dark:!bg-[#0F172A] border border-[#CBD5E1] dark:border-[#334155] hover:border-[#00875A] dark:hover:border-[#00875A] rounded-lg px-2.5 py-1 pr-6 text-[12px] font-medium text-[#1E293B] dark:text-[#F8FAFC] cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#00875A] transition shadow-xs"
-                  >
-                    {Array.from({ length: totalPages }).map((_, idx) => (
-                      <option key={idx + 1} value={idx + 1} className="dark:bg-[#0F172A] dark:text-[#F8FAFC]">
-                        {idx + 1}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={13}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#00875A]"
-                  />
-                </div>
+          {/* Tombol Lihat Semua (Default 10 Data, Tanpa Pagination Bar Sesuai Permintaan) */}
+          {filteredLeaderboard.length > 10 && (
+            <div className="flex justify-center p-4 bg-white dark:bg-[#1E293B] border-t border-[#E0E0E0] dark:border-[#334155]">
+              <button
+                type="button"
+                onClick={() => setShowAllData(!showAllData)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-[13px] text-[#00875A] dark:text-[#34D399] bg-white dark:bg-[#1E293B] border border-[#00875A]/30 hover:bg-[#F8FAFC] dark:hover:bg-[#334155] transition-all shadow-xs cursor-pointer active:scale-95"
+              >
                 <span>
-                  dari <strong className="font-bold text-[#1E293B] dark:text-[#F8FAFC]">{totalPages}</strong>
+                  {showAllData
+                    ? 'Tampilkan Lebih Sedikit (10 Data)'
+                    : `Lihat Semua (${filteredLeaderboard.length} P3DW)`}
                 </span>
-              </div>
-
-              {/* Navigation Arrows Button Pill [ < | > ] */}
-              <div className="flex items-center border border-[#CBD5E1] dark:border-[#334155] rounded-lg overflow-hidden bg-white dark:!bg-[#0F172A] shadow-xs">
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="p-1.5 px-2.5 hover:bg-[#F1F5F9] dark:hover:!bg-[#1E293B] disabled:opacity-30 disabled:cursor-not-allowed border-r border-[#CBD5E1] dark:border-[#334155] transition flex items-center justify-center text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]"
-                  title="Halaman Sebelumnya"
-                >
-                  <ChevronLeft size={15} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage >= totalPages}
-                  className="p-1.5 px-2.5 hover:bg-[#F1F5F9] dark:hover:!bg-[#1E293B] disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center justify-center text-[#00875A] dark:text-[#34D399] hover:text-[#006644] dark:hover:text-[#10B981]"
-                  title="Halaman Berikutnya"
-                >
-                  <ChevronRight size={15} />
-                </button>
-              </div>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${showAllData ? 'rotate-180' : ''
+                    }`}
+                />
+              </button>
             </div>
-          </div>
+          )}
         </div>
       </section>
+
+      {/* MODAL PENJELASAN TIAP BOX (KONDISI, MAKNA, TINDAK LANJUT) */}
+      <NineBoxExplanationModal
+        isOpen={isExplanationModalOpen}
+        onClose={() => setIsExplanationModalOpen(false)}
+        initialBoxNumber={selectedBoxModal}
+      />
     </div>
   );
 };

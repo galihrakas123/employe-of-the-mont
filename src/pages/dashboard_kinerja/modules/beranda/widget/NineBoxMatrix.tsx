@@ -69,55 +69,55 @@ export const NineBoxMatrix: React.FC<NineBoxMatrixProps> = ({
             {/* Box 7 (Top Left) */}
             <div style={{ background: '#f8fafc', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '6px 8px' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#334155' }}>Box 7</div>
-              <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Kontribusi potensial tinggi</div>
+              <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Maintain</div>
             </div>
 
             {/* Box 8 (Top Center) */}
-            <div style={{ background: '#f1f5f9', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '6px 8px' }}>
+            <div style={{ background: '#f8fafc', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '6px 8px' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#334155' }}>Box 8</div>
-              <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Kinerja tinggi</div>
+              <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Strategic Contributor</div>
             </div>
 
-            {/* Box 9 (Top Right - Bintang Utama) */}
+            {/* Box 9 (Top Right - Kapus of the Month) */}
             <div style={{ background: '#e0f2fe', borderBottom: '1px solid #e2e8f0', padding: '6px 8px', position: 'relative' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0369a1' }}>Box 9</div>
-              <div style={{ fontSize: '0.6rem', color: '#0284c7', fontWeight: 600 }}>Bintang Utama ⭐</div>
+              <div style={{ fontSize: '0.6rem', color: '#0284c7', fontWeight: 600 }}>Kapus of the Month ⭐</div>
             </div>
 
             {/* Box 4 (Middle Left) */}
             <div style={{ background: '#fef2f2', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '6px 8px' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#991b1b' }}>Box 4</div>
-              <div style={{ fontSize: '0.6rem', color: '#dc2626' }}>Penilaian rendah</div>
+              <div style={{ fontSize: '0.6rem', color: '#dc2626' }}>Develop</div>
             </div>
 
-            {/* Box 5 (Middle Center - Inti) */}
+            {/* Box 5 (Middle Center - Core Contributor) */}
             <div style={{ background: '#fffbeb', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '6px 8px' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#92400e' }}>Box 5</div>
-              <div style={{ fontSize: '0.6rem', color: '#b45309' }}>Inti</div>
+              <div style={{ fontSize: '0.6rem', color: '#b45309' }}>Core Contributor</div>
             </div>
 
             {/* Box 6 (Middle Right) */}
             <div style={{ background: '#f0fdf4', borderBottom: '1px solid #e2e8f0', padding: '6px 8px' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#166534' }}>Box 6</div>
-              <div style={{ fontSize: '0.6rem', color: '#15803d' }}>Potensi tinggi hasil cukup</div>
+              <div style={{ fontSize: '0.6rem', color: '#15803d' }}>Growth Potential</div>
             </div>
 
             {/* Box 1 (Bottom Left) */}
             <div style={{ background: '#fee2e2', borderRight: '1px solid #e2e8f0', padding: '6px 8px' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#b91c1c' }}>Box 1</div>
-              <div style={{ fontSize: '0.6rem', color: '#ef4444' }}>Perlu pembinaan</div>
+              <div style={{ fontSize: '0.6rem', color: '#ef4444' }}>Priority Improvement</div>
             </div>
 
             {/* Box 2 (Bottom Center) */}
             <div style={{ background: '#fef3c7', borderRight: '1px solid #e2e8f0', padding: '6px 8px' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#b45309' }}>Box 2</div>
-              <div style={{ fontSize: '0.6rem', color: '#d97706' }}>Pasif tertinggal</div>
+              <div style={{ fontSize: '0.6rem', color: '#d97706' }}>Monitor</div>
             </div>
 
             {/* Box 3 (Bottom Right) */}
             <div style={{ background: '#f8fafc', padding: '6px 8px' }}>
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569' }}>Box 3</div>
-              <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Mendorong hasil belum optimal</div>
+              <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Potential Developee</div>
             </div>
 
             {/* Scatter points rendered inside grid */}

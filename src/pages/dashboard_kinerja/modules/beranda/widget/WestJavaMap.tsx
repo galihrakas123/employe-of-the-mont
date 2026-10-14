@@ -1,6 +1,6 @@
 import React from 'react';
 import { MapPin, Search, ZoomIn, ZoomOut } from 'lucide-react';
-import { mockMapLocations } from '@/services/dashboardMockData';
+import { mockMapLocations, MapLocationItem } from '@/services/dashboardMockData';
 
 interface WestJavaMapProps {
   onLocationClick?: (name: string, score: number) => void;
@@ -98,7 +98,7 @@ export const WestJavaMap: React.FC<WestJavaMapProps> = ({ onLocationClick }) => 
           </svg>
 
           {/* City / Unit Pin Badges from Screenshot */}
-          {mockMapLocations.map((loc) => {
+          {mockMapLocations.map((loc: MapLocationItem) => {
             const pinColors: Record<string, string> = {
               'Sangat Baik': '#1d4ed8',
               'Baik': '#0284c7',

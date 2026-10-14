@@ -2,51 +2,62 @@ import React from 'react';
 
 interface RadarKomposisiChartProps {
   scores?: {
-    a: number;
-    b: number;
-    c: number;
-    d: number;
-    e: number;
+    pendapatan?: number;
+    kepatuhan?: number;
+    pelayanan?: number;
+    tataKelola?: number;
+    sdm?: number;
+    a?: number;
+    b?: number;
+    c?: number;
+    d?: number;
+    e?: number;
   };
 }
 
 export const RadarKomposisiChart: React.FC<RadarKomposisiChartProps> = ({
   scores = { a: 96, b: 95, c: 96, d: 94, e: 97 },
 }) => {
-  const avg = (scores.a + scores.b + scores.c + scores.d + scores.e) / 5;
+  const p1 = scores.pendapatan ?? scores.a ?? 96;
+  const p2 = scores.kepatuhan ?? scores.b ?? 95;
+  const p3 = scores.pelayanan ?? scores.c ?? 96;
+  const p4 = scores.tataKelola ?? scores.d ?? 94;
+  const p5 = scores.sdm ?? scores.e ?? 97;
+
+  const avg = (p1 + p2 + p3 + p4 + p5) / 5;
 
   // Center & max radius
   const cx = 120;
   const cy = 100;
   const maxR = 72;
 
-  // Calculate dynamic coordinates for each axis
+  // Calculate dynamic coordinates for each axis (scaled to max 120)
   const getPoint = (scoreVal: number, angleDeg: number) => {
-    const r = (Math.max(15, Math.min(100, scoreVal)) / 100) * maxR;
+    const r = (Math.max(15, Math.min(120, scoreVal)) / 120) * maxR;
     const rad = (angleDeg * Math.PI) / 180;
     const x = Math.round(cx + r * Math.cos(rad));
     const y = Math.round(cy + r * Math.sin(rad));
     return { x, y };
   };
 
-  const pA = getPoint(scores.a, -90);
-  const pB = getPoint(scores.b, -18);
-  const pC = getPoint(scores.c, 54);
-  const pD = getPoint(scores.d, 126);
-  const pE = getPoint(scores.e, 198);
+  const pA = getPoint(p1, -90);
+  const pB = getPoint(p2, -18);
+  const pC = getPoint(p3, 54);
+  const pD = getPoint(p4, 126);
+  const pE = getPoint(p5, 198);
 
   const polygonPoints = `${pA.x},${pA.y} ${pB.x},${pB.y} ${pC.x},${pC.y} ${pD.x},${pD.y} ${pE.x},${pE.y}`;
 
   // Color theme according to average score
   let strokeColor = '#00875A';
   let fillColor = 'rgba(0, 135, 90, 0.18)';
-  if (avg < 60) {
+  if (avg < 70) {
     strokeColor = '#DC2626';
     fillColor = 'rgba(220, 38, 38, 0.18)';
-  } else if (avg < 75) {
+  } else if (avg < 90) {
     strokeColor = '#D97706';
     fillColor = 'rgba(217, 119, 6, 0.18)';
-  } else if (avg < 85) {
+  } else if (avg < 100) {
     strokeColor = '#0284C7';
     fillColor = 'rgba(2, 132, 199, 0.18)';
   }
@@ -55,15 +66,15 @@ export const RadarKomposisiChart: React.FC<RadarKomposisiChartProps> = ({
     <div className="bg-white rounded-xl border border-[#E0E0E0] shadow-sm p-6 font-roboto flex flex-col justify-between">
       <div className="mb-2">
         <h4 className="text-[15px] font-semibold text-[#212121]">
-          Komposisi 5 Pilar Kinerja
+          Komposisi 5 Area Penilaian
         </h4>
         <p className="text-[12px] text-[#757575] mt-0.5">
-          Distribusi capaian pilar penilaian strategis
+          Distribusi capaian pilar penilaian Talent Box Samsat
         </p>
       </div>
 
       <div className="w-full flex items-center justify-center my-2">
-        <svg viewBox="0 0 240 210" className="w-full max-h-[190px]">
+        <svg viewBox="0 0 260 220" className="w-full max-h-[200px]">
           {/* Pentagon web lines */}
           <polygon points="120,25 195,75 168,160 72,160 45,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
           <polygon points="120,50 170,85 152,142 88,142 70,85" fill="none" stroke="#F1F5F9" strokeWidth="1" />
@@ -99,11 +110,11 @@ export const RadarKomposisiChart: React.FC<RadarKomposisiChartProps> = ({
           <circle cx={pE.x} cy={pE.y} r="3.5" fill={strokeColor} stroke="#FFFFFF" strokeWidth="1" />
 
           {/* Axis Labels */}
-          <text x="120" y="16" textAnchor="middle" fontSize="8" fill="#1E293B" fontWeight="700">A. Fiskal ({scores.a})</text>
-          <text x="202" y="78" textAnchor="start" fontSize="8" fill="#1E293B" fontWeight="700">B. WP ({scores.b})</text>
-          <text x="175" y="174" textAnchor="middle" fontSize="8" fill="#1E293B" fontWeight="700">C. Proses ({scores.c})</text>
-          <text x="65" y="174" textAnchor="middle" fontSize="8" fill="#1E293B" fontWeight="700">D. Budaya ({scores.d})</text>
-          <text x="38" y="78" textAnchor="end" fontSize="8" fill="#1E293B" fontWeight="700">E. SDM ({scores.e})</text>
+          <text x="120" y="15" textAnchor="middle" fontSize="7.5" fill="#1E293B" fontWeight="700">1. Pendapatan ({p1})</text>
+          <text x="202" y="76" textAnchor="start" fontSize="7.5" fill="#1E293B" fontWeight="700">2. Kepatuhan ({p2})</text>
+          <text x="175" y="174" textAnchor="middle" fontSize="7.5" fill="#1E293B" fontWeight="700">3. Pelayanan ({p3})</text>
+          <text x="65" y="174" textAnchor="middle" fontSize="7.5" fill="#1E293B" fontWeight="700">4. Tata Kelola ({p4})</text>
+          <text x="38" y="76" textAnchor="end" fontSize="7.5" fill="#1E293B" fontWeight="700">5. SDM ({p5})</text>
         </svg>
       </div>
 
@@ -112,7 +123,7 @@ export const RadarKomposisiChart: React.FC<RadarKomposisiChartProps> = ({
           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: strokeColor }} /> Capaian Unit ({avg.toFixed(1)})
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 border-t-2 border-dashed border-[#94A3B8]" /> Rata-rata Jabar
+          <span className="w-3 border-t-2 border-dashed border-[#94A3B8]" /> Target Provinsi
         </span>
       </div>
     </div>
