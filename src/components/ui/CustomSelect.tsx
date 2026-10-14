@@ -13,6 +13,8 @@ export interface CustomSelectProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  /** Tinggi 40px (bawaan 44px) untuk baris filter yang ringkas */
+  compact?: boolean;
 }
 
 export const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -22,6 +24,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   onChange,
   placeholder = 'Pilih...',
   className = '',
+  compact = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -57,8 +60,9 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
       {/* Select Trigger Box (Sesuai Desain Sistem: h-[44px], rounded-[12px], border-[#E0E0E0], open: border-[#00875A]) */}
       <button
         type="button"
+        aria-label={label ?? placeholder}
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`w-full min-w-[150px] h-[44px] flex items-center justify-between gap-3 px-3.5 rounded-[12px] transition-all text-left outline-none ${
+        className={`w-full min-w-[150px] ${compact ? 'h-10' : 'h-[44px]'} flex items-center justify-between gap-3 px-3.5 rounded-[12px] transition-all text-left outline-none ${
           isOpen
             ? 'border-2 border-[#00875A] bg-white dark:!bg-[#0F172A] shadow-sm'
             : 'border border-[#E0E0E0] dark:border-[#334155] bg-[#F5F5F5] dark:!bg-[#0F172A] hover:bg-white dark:hover:!bg-[#1E293B] hover:border-[#00875A]'

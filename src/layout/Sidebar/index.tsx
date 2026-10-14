@@ -31,17 +31,14 @@ export const Sidebar: React.FC = () => {
             <img src={bapendaLogo} alt="Logo Bapenda" className="w-full h-full object-contain" />
           </div>
 
-          {/* Teks: DASHBOARD / KINERJA / Bapenda Jabar */}
+          {/* Teks brand: dua baris ringkas */}
           {isExpanded && (
             <div className="overflow-hidden transition-opacity duration-200 flex flex-col justify-center">
-              <div className="text-[13px] font-black tracking-tight text-[#0F172A] dark:text-[#F8FAFC] uppercase leading-none whitespace-nowrap">
-                DASHBOARD
-              </div>
-              <div className="text-[12px] font-bold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] uppercase leading-tight whitespace-nowrap mt-0.5">
-                KINERJA
+              <div className="text-[14px] font-bold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] leading-tight whitespace-nowrap">
+                Dashboard Kinerja
               </div>
               <div className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] whitespace-nowrap mt-0.5">
-                Bapenda Jabar
+                Bapenda Jawa Barat
               </div>
             </div>
           )}

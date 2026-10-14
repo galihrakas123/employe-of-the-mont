@@ -386,69 +386,53 @@ export const BerandaDashboardPage: React.FC = () => {
 
       {/* 3. LEADERBOARD & KOMPARASI AREA (Sesuai Referensi Gambar) */}
       <section className="flex-[3_1_860px] min-w-0 max-w-full flex flex-col bg-white dark:bg-[#1E293B] rounded-xl p-4 sm:p-6 border border-[#E0E0E0] dark:border-[#334155] shadow-sm">
-        {/* Header: Title, Keterangan Warna, & Filter Controls */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-5">
-          <div>
-            <h3 className="text-[18px] font-semibold text-[#212121] dark:text-[#F8FAFC]">
+        {/* Header: judul & keterangan warna sebaris, filter dalam satu baris di bawahnya */}
+        <div className="flex flex-col gap-3 mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <h3 className="text-[16px] font-semibold text-[#212121] dark:text-[#F8FAFC]">
               Leaderboard &amp; Komparasi Area
             </h3>
-
-            {/* Keterangan Warna Sesuai Gambar Referensi (Kinerja Kuat A, Sedang B, Kurang C/D) */}
-            <div className="flex items-center gap-3.5 mt-1.5 text-[12px] text-[#616161] dark:text-[#94A3B8] flex-wrap">
-              <span className="text-[#424242] dark:text-[#E2E8F0] font-bold">Keterangan Warna:</span>
-              <span className="flex items-center gap-1.5 text-[#616161] dark:text-[#CBD5E1]">
+            <div className="flex items-center gap-3 text-[12px] text-[#616161] dark:text-[#CBD5E1] flex-wrap">
+              <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#52C41A] inline-block shrink-0" /> Kinerja Kuat (A)
               </span>
-              <span className="flex items-center gap-1.5 text-[#616161] dark:text-[#CBD5E1]">
+              <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#FADB14] inline-block shrink-0" /> Sedang (B)
               </span>
-              <span className="flex items-center gap-1.5 text-[#616161] dark:text-[#CBD5E1]">
+              <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#FF7875] inline-block shrink-0" /> Kurang (C/D)
               </span>
             </div>
           </div>
 
-          {/* Form Controls: Pencarian (Sesuai Gambar Referensi Kedua), Klaster, Kanwil */}
-          <div className="flex flex-wrap items-end gap-3 w-full lg:w-auto">
-            {/* Input Pencarian Sesuai Desain Sistem (Gambar Referensi ke-2: Rounded-12px & Tombol Hijau Squircle) */}
-            <div className="flex flex-col">
-              <span className="text-[14px] font-medium text-[#212121] dark:text-[#F8FAFC] mb-1.5 leading-none">
-                Pencarian:
-              </span>
-              <div className="flex items-center w-56 sm:w-64 h-[44px] pl-4 pr-1.5 bg-white dark:bg-[#0F172A] border border-[#E0E0E0] dark:border-[#334155] rounded-[12px] shadow-2xs focus-within:border-[#00875A] focus-within:ring-1 focus-within:ring-[#00875A] transition-all">
-                <input
-                  type="text"
-                  placeholder="Pencarian"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-[14px] text-[#212121] dark:text-[#F8FAFC] placeholder:text-[#757575] dark:placeholder:text-[#94A3B8]"
-                />
-                <button
-                  type="button"
-                  className="w-[36px] h-[36px] rounded-[10px] bg-[#00875A] hover:bg-[#00724C] text-white flex items-center justify-center shrink-0 ml-1.5 transition cursor-pointer active:scale-95 shadow-xs"
-                  title="Cari"
-                >
-                  <Search size={18} className="stroke-[2.5]" />
-                </button>
-              </div>
-            </div>
-
-            {/* Klaster Select */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Pencarian langsung saat mengetik */}
+            <label className="flex-[1_1_220px] flex items-center gap-2 h-10 px-3.5 bg-white dark:bg-[#0F172A] border border-[#E0E0E0] dark:border-[#334155] rounded-[12px] shadow-2xs focus-within:border-[#00875A] focus-within:ring-1 focus-within:ring-[#00875A] transition-all">
+              <Search size={16} className="text-[#00875A] shrink-0 stroke-[2.5]" />
+              <input
+                type="text"
+                placeholder="Cari nama P3DW atau kode wilayah"
+                aria-label="Pencarian"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-none outline-none text-[14px] text-[#212121] dark:text-[#F8FAFC] placeholder:text-[#757575] dark:placeholder:text-[#94A3B8]"
+              />
+            </label>
             <CustomSelect
-              label="Klaster:"
+              compact
+              placeholder="Klaster"
               value={filterKlaster}
               options={klasterOptions}
               onChange={(val) => setFilterKlaster(val)}
-              className="w-36 sm:w-40"
+              className="w-40"
             />
-
-            {/* Korwil Select (Sesuai Permintaan User: Nama Filter 'Korwil' & Opsi 'Semua Korwil') */}
             <CustomSelect
-              label="Korwil:"
+              compact
+              placeholder="Korwil"
               value={filterKorwil}
               options={korwilOptions}
               onChange={(val) => setFilterKorwil(val)}
-              className="w-44 sm:w-48"
+              className="w-56"
             />
           </div>
         </div>
