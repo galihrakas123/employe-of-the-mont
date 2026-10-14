@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Activity,
@@ -13,6 +13,7 @@ import {
   Check,
   TrendingUp,
   HelpCircle,
+  X,
 } from 'lucide-react';
 import {
   mockKpiTopCards,
@@ -31,7 +32,16 @@ export const BerandaDashboardPage: React.FC = () => {
   const navigate = useNavigate();
 
   // State
-  const [selectedUnit, setSelectedUnit] = useState<P3dwScatterData>(mockScatterData[0]);
+  // Default tidak ada unit terpilih; klik ulang unit yang sama, tombol ✕, atau Esc untuk membatalkan pilihan
+  const [selectedUnit, setSelectedUnit] = useState<P3dwScatterData | null>(null);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedUnit(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
   const [filterKlaster, setFilterKlaster] = useState<string>('ALL');
   const [filterKorwil, setFilterKorwil] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -45,6 +55,10 @@ export const BerandaDashboardPage: React.FC = () => {
 
   // Pilih unit tanpa mengubah filter tabel, agar daftar P3DW lain tetap tampil
   const handleSelectBranch = (unitId: string) => {
+    if (selectedUnit?.id === unitId) {
+      setSelectedUnit(null);
+      return;
+    }
     const match = mockScatterData.find((s) => s.id === unitId);
     if (match) setSelectedUnit(match);
   };
@@ -104,32 +118,26 @@ export const BerandaDashboardPage: React.FC = () => {
     }
   };
 
-  // Helper warna latar baris tabel berdasarkan Predikat Kinerja (Sesuai Keterangan Warna & Referensi Gambar)
-  const getRowBgColor = (grade: string, predikat: string, isSelected: boolean) => {
+  // Warna baris tabel mengikuti klaster: Besar hijau, Sedang kuning, Kecil merah
+  const KLASTER_ROW_TINT: Record<string, string> = {
+    'Klaster Besar': 'bg-green-100 dark:bg-[#064E3B]/20',
+    'Klaster Sedang': 'bg-yellow-100 dark:bg-[#78350F]/20',
+    'Klaster Kecil': 'bg-red-100 dark:bg-[#881337]/20',
+  };
+  const KLASTER_ROW_HOVER: Record<string, string> = {
+    'Klaster Besar': 'hover:bg-green-200/70 dark:hover:bg-[#064E3B]/35',
+    'Klaster Sedang': 'hover:bg-yellow-200/70 dark:hover:bg-[#78350F]/35',
+    'Klaster Kecil': 'hover:bg-red-200/70 dark:hover:bg-[#881337]/35',
+  };
+
+  const getRowBgColor = (klaster: string, isSelected: boolean) => {
     if (isSelected) return 'bg-[#E6F4EA] dark:bg-[#00875A]/30 border-l-4 border-l-[#00875A]';
-    const g = (grade || '').toUpperCase();
-    const p = (predikat || '').toLowerCase();
-    // Kinerja Kuat (A)
-    if (g === 'A' || p.includes('sangat baik')) {
-      return 'bg-[#F0FDF4] hover:bg-[#DCFCE7]/70 dark:bg-[#064E3B]/20 dark:hover:bg-[#064E3B]/35';
-    }
-    // Sedang (B)
-    if (g === 'B' || p.includes('baik')) {
-      return 'bg-[#FEFCE8] hover:bg-[#FEF9C3]/70 dark:bg-[#78350F]/20 dark:hover:bg-[#78350F]/35';
-    }
-    // Kurang (C/D)
-    return 'bg-[#FFF1F2] hover:bg-[#FFE4E6]/70 dark:bg-[#881337]/20 dark:hover:bg-[#881337]/35';
+    return `${KLASTER_ROW_TINT[klaster] ?? ''} ${KLASTER_ROW_HOVER[klaster] ?? ''}`;
   };
 
   // Warna lapisan kolom AKSI yang di-pin: sama dengan warna baris, ditumpuk di atas latar solid
-  const getRowTint = (grade: string, predikat: string, isSelected: boolean) => {
-    if (isSelected) return 'bg-[#E6F4EA] dark:bg-[#00875A]/30';
-    const g = (grade || '').toUpperCase();
-    const p = (predikat || '').toLowerCase();
-    if (g === 'A' || p.includes('sangat baik')) return 'bg-[#F0FDF4] dark:bg-[#064E3B]/20';
-    if (g === 'B' || p.includes('baik')) return 'bg-[#FEFCE8] dark:bg-[#78350F]/20';
-    return 'bg-[#FFF1F2] dark:bg-[#881337]/20';
-  };
+  const getRowTint = (klaster: string, isSelected: boolean) =>
+    isSelected ? 'bg-[#E6F4EA] dark:bg-[#00875A]/30' : KLASTER_ROW_TINT[klaster] ?? '';
 
   // Helper styling predikat lengkap (Sesuai Referensi Gambar)
   const getPredikatBadgeStyle = (predikat: string) => {
@@ -284,7 +292,7 @@ export const BerandaDashboardPage: React.FC = () => {
               </div>
               <button
                 type="button"
-                onClick={() => handleOpenBoxExplanation(selectedUnit.boxNumber || 9)}
+                onClick={() => handleOpenBoxExplanation(selectedUnit?.boxNumber ?? 9)}
                 className="text-[11px] font-medium text-[#00875A] hover:text-[#006644] hover:underline inline-flex items-center gap-1 cursor-pointer shrink-0 py-1 px-2.5 rounded-lg bg-[#E6F4EA]/70 hover:bg-[#E6F4EA] transition"
                 title="Lihat penjelasan dan panduan untuk tiap box"
               >
@@ -297,11 +305,8 @@ export const BerandaDashboardPage: React.FC = () => {
             <TalentBoxMatrix
               showCounts
               dimmed={dimmedUnitIds}
-              selectedId={selectedUnit.id}
-              onSelect={(id) => {
-                const match = mockScatterData.find((s) => s.id === id);
-                if (match) setSelectedUnit(match);
-              }}
+              selectedId={selectedUnit?.id}
+              onSelect={handleSelectBranch}
               onBoxClick={handleOpenBoxExplanation}
               points={mockScatterData.map((item) => ({
                 id: item.id,
@@ -317,70 +322,87 @@ export const BerandaDashboardPage: React.FC = () => {
           </div>
 
           {/* Unit Terpilih: identitas unit, lalu angka sumbu, skor & tombol detail dalam satu baris */}
-          <div className="mt-4 p-4 rounded-xl bg-[#FAFAFA] dark:!bg-[#0F172A] border border-[#E0E0E0] dark:border-[#334155]">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-[11px] font-medium text-[#757575] dark:text-[#94A3B8]">Unit Terpilih</div>
-                <div className="text-[15px] font-semibold text-[#212121] dark:text-[#F8FAFC] leading-snug truncate">
-                  {selectedUnit.nama}
-                </div>
-                <div className="text-[12px] leading-snug">
-                  <span className="font-semibold text-[#00875A] dark:text-[#34D399]">
-                    Box {selectedUnit.boxNumber} · {NINE_BOX_DETAILS[selectedUnit.boxNumber]?.name}
-                  </span>
-                  <span className="text-[11px] text-[#94A3B8]">
-                    {' '}({NINE_BOX_DETAILS[selectedUnit.boxNumber]?.label.replace(', ', ' · ')})
-                  </span>
-                </div>
-              </div>
-              <span className="shrink-0 whitespace-nowrap text-[10px] font-medium text-[#475569] dark:text-[#E2E8F0] bg-[#F1F5F9] dark:!bg-[#1E293B] px-2.5 py-0.5 rounded-full border border-[#E2E8F0] dark:border-[#334155]">
-                {selectedUnit.korwil}
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-end justify-between gap-x-5 gap-y-3 mt-3 pt-3 border-t border-[#E0E0E0] dark:border-[#334155]">
-              <div className="flex gap-5">
-                <div>
-                  <div className="text-[11px] text-[#757575] dark:text-[#94A3B8]">Kinerja (Y)</div>
-                  <div className="text-[17px] font-bold leading-tight text-[#00875A] dark:text-[#34D399]">
-                    {selectedUnit.y.toFixed(1).replace('.', ',')}
-                    <span className="ml-1 text-[10px] font-medium text-[#94A3B8]">{selectedUnit.kinerjaLevel}</span>
+          {selectedUnit ? (
+            <div className="mt-4 p-4 rounded-xl bg-[#FAFAFA] dark:!bg-[#0F172A] border border-[#E0E0E0] dark:border-[#334155]">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] font-medium text-[#757575] dark:text-[#94A3B8]">Unit Terpilih</div>
+                  <div className="text-[15px] font-semibold text-[#212121] dark:text-[#F8FAFC] leading-snug truncate">
+                    {selectedUnit.nama}
                   </div>
-                </div>
-                <div>
-                  <div className="text-[11px] text-[#757575] dark:text-[#94A3B8]">Potensi (X)</div>
-                  <div className="text-[17px] font-bold leading-tight text-[#0284C7] dark:text-[#38BDF8]">
-                    {selectedUnit.x.toFixed(1).replace('.', ',')}
-                    <span className="ml-1 text-[10px] font-medium text-[#94A3B8]">{selectedUnit.potensiLevel}</span>
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[11px] text-[#757575] dark:text-[#94A3B8]">Skor Akhir</div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[17px] font-bold leading-tight text-[#212121] dark:text-[#F8FAFC]">
-                      {selectedUnit.skorTotal.toFixed(1).replace('.', ',')}
+                  <div className="text-[12px] leading-snug">
+                    <span className="font-semibold text-[#00875A] dark:text-[#34D399]">
+                      Box {selectedUnit.boxNumber} · {NINE_BOX_DETAILS[selectedUnit.boxNumber]?.name}
                     </span>
-                    <span
-                      className={`px-2 py-px rounded-full text-[10px] font-semibold whitespace-nowrap ${getKategoriBadgeStyle(
-                        selectedUnit.kategori
-                      )}`}
-                    >
-                      {selectedUnit.kategori}
+                    <span className="text-[11px] text-[#94A3B8]">
+                      {' '}({NINE_BOX_DETAILS[selectedUnit.boxNumber]?.label.replace(', ', ' · ')})
                     </span>
                   </div>
                 </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="whitespace-nowrap text-[10px] font-medium text-[#475569] dark:text-[#E2E8F0] bg-[#F1F5F9] dark:!bg-[#1E293B] px-2.5 py-0.5 rounded-full border border-[#E2E8F0] dark:border-[#334155]">
+                    {selectedUnit.korwil}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedUnit(null)}
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0] dark:hover:bg-[#334155] transition cursor-pointer"
+                    title="Batalkan pilihan (Esc)"
+                    aria-label="Batalkan pilihan unit"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => navigate(`/beranda/detail-analisis?id=${selectedUnit.id}`)}
-                className="ml-auto inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#00875A] hover:bg-[#00724C] text-white rounded-[10px] text-[13px] font-medium transition shadow-sm whitespace-nowrap cursor-pointer"
-              >
-                <span>Lihat Detail</span>
-                <ArrowUpRight size={14} />
-              </button>
+              <div className="flex flex-wrap items-end justify-between gap-x-5 gap-y-3 mt-3 pt-3 border-t border-[#E0E0E0] dark:border-[#334155]">
+                <div className="flex gap-5">
+                  <div>
+                    <div className="text-[11px] text-[#757575] dark:text-[#94A3B8]">Kinerja (Y)</div>
+                    <div className="text-[17px] font-bold leading-tight text-[#00875A] dark:text-[#34D399]">
+                      {selectedUnit.y.toFixed(1).replace('.', ',')}
+                      <span className="ml-1 text-[10px] font-medium text-[#94A3B8]">{selectedUnit.kinerjaLevel}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-[#757575] dark:text-[#94A3B8]">Potensi (X)</div>
+                    <div className="text-[17px] font-bold leading-tight text-[#0284C7] dark:text-[#38BDF8]">
+                      {selectedUnit.x.toFixed(1).replace('.', ',')}
+                      <span className="ml-1 text-[10px] font-medium text-[#94A3B8]">{selectedUnit.potensiLevel}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-[#757575] dark:text-[#94A3B8]">Skor Akhir</div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[17px] font-bold leading-tight text-[#212121] dark:text-[#F8FAFC]">
+                        {selectedUnit.skorTotal.toFixed(1).replace('.', ',')}
+                      </span>
+                      <span
+                        className={`px-2 py-px rounded-full text-[10px] font-semibold whitespace-nowrap ${getKategoriBadgeStyle(
+                          selectedUnit.kategori
+                        )}`}
+                      >
+                        {selectedUnit.kategori}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigate(`/beranda/detail-analisis?id=${selectedUnit.id}`)}
+                  className="ml-auto inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#00875A] hover:bg-[#00724C] text-white rounded-[10px] text-[13px] font-medium transition shadow-sm whitespace-nowrap cursor-pointer"
+                >
+                  <span>Lihat Detail</span>
+                  <ArrowUpRight size={14} />
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-4 p-4 rounded-xl border border-dashed border-[#CBD5E1] dark:border-[#334155] text-center text-[12px] text-[#757575] dark:text-[#94A3B8]">
+              Belum ada unit dipilih. Klik titik di matriks atau nama P3DW di tabel untuk melihat ringkasannya.
+            </div>
+          )}
         </div>
       </section>
 
@@ -394,13 +416,13 @@ export const BerandaDashboardPage: React.FC = () => {
             </h3>
             <div className="flex items-center gap-3 text-[12px] text-[#616161] dark:text-[#CBD5E1] flex-wrap">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#52C41A] inline-block shrink-0" /> Kinerja Kuat (A)
+                <span className="w-2.5 h-2.5 rounded-full bg-[#52C41A] inline-block shrink-0" /> Klaster Besar
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FADB14] inline-block shrink-0" /> Sedang (B)
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FADB14] inline-block shrink-0" /> Klaster Sedang
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FF7875] inline-block shrink-0" /> Kurang (C/D)
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FF7875] inline-block shrink-0" /> Klaster Kecil
               </span>
             </div>
           </div>
@@ -482,9 +504,8 @@ export const BerandaDashboardPage: React.FC = () => {
                     <tr
                       key={row.id}
                       className={`transition-colors border-b border-[#E0E0E0]/60 dark:border-[#334155] ${getRowBgColor(
-                        row.grade,
-                        row.predikat,
-                        selectedUnit.id === row.id
+                        row.klaster,
+                        selectedUnit?.id === row.id
                       )}`}
                     >
                       <td className="py-3 px-3 font-bold text-center text-[#1E293B] dark:text-[#F8FAFC] border-r border-[#E0E0E0]/60 dark:border-[#334155]">
@@ -545,7 +566,7 @@ export const BerandaDashboardPage: React.FC = () => {
                       <td className="sticky right-0 z-[1] py-3 px-4 text-center bg-white dark:bg-[#1E293B] shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.18)]">
                         <span
                           aria-hidden
-                          className={`absolute inset-0 ${getRowTint(row.grade, row.predikat, selectedUnit.id === row.id)}`}
+                          className={`absolute inset-0 ${getRowTint(row.klaster, selectedUnit?.id === row.id)}`}
                         />
                         <button
                           type="button"

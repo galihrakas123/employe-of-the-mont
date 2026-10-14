@@ -188,3 +188,32 @@ html.dark .custom-leaflet-popup .leaflet-popup-tip {
     opacity: 0;
   }
 }
+
+/* Garis cabang tree penilaian (detail analisis) */
+.tkids {
+  margin-left: 14px;
+  padding-left: 16px;
+  border-left: 2px solid #E2E8F0;
+}
+
+.tnode {
+  position: relative;
+}
+
+.tnode::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 23px;
+  width: 14px;
+  height: 2px;
+  background: #E2E8F0;
+}
+
+html.dark .tkids {
+  border-left-color: #334155;
+}
+
+html.dark .tnode::before {
+  background: #334155;
+}

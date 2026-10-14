@@ -255,7 +255,7 @@ const rawP3dwList: RawP3dw[] = [
   { id: '12900', kd_wil: '12900', nama: 'P3D Wil. Kab. Ciamis', namaPendek: 'Kab. Ciamis', kanwil: 'Korwil Priangan Timur', korwilRomawi: 'Korwil V', klaster: 'Klaster Kecil', lat: -7.3274, lng: 108.3541, scorePendapatan: 116, scoreKepatuhan: 117, scorePelayanan: 114, scoreTataKelola: 115, scoreSdm: 111 },
   { id: '11600', kd_wil: '11600', nama: 'P3D Wil. Kab Indramayu I', namaPendek: 'Kab Indramayu I', kanwil: 'Korwil Ciayumajakuning', korwilRomawi: 'Korwil IV', klaster: 'Klaster Sedang', lat: -6.3264, lng: 108.3200, scorePendapatan: 118, scoreKepatuhan: 109, scorePelayanan: 104, scoreTataKelola: 104, scoreSdm: 104 },
   { id: '10500', kd_wil: '10500', nama: 'P3D Wil. Kab. Sukabumi I Cibadak', namaPendek: 'Kab. Sukabumi I Cibadak', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Sedang', lat: -6.8920, lng: 106.7820, scorePendapatan: 107, scoreKepatuhan: 109, scorePelayanan: 111, scoreTataKelola: 112, scoreSdm: 102 },
-  { id: '10700', kd_wil: '10700', nama: 'P3D Wil. Kab. Cianjur', namaPendek: 'Kab. Cianjur', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Besar', lat: -6.8219, lng: 107.1397, scorePendapatan: 108, scoreKepatuhan: 109, scorePelayanan: 104, scoreTataKelola: 106, scoreSdm: 111 },
+  { id: '10700', kd_wil: '10700', nama: 'P3D Wil. Kab. Cianjur', namaPendek: 'Kab. Cianjur', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Sedang', lat: -6.8219, lng: 107.1397, scorePendapatan: 108, scoreKepatuhan: 109, scorePelayanan: 104, scoreTataKelola: 106, scoreSdm: 111 },
   { id: '20900', kd_wil: '20900', nama: 'P3D Wil. Kab. Bekasi - Cikarang', namaPendek: 'Kab. Bekasi - Cikarang', kanwil: 'Korwil Purwakarta', korwilRomawi: 'Korwil I', klaster: 'Klaster Besar', lat: -6.2383, lng: 106.9756, scorePendapatan: 109, scoreKepatuhan: 104, scorePelayanan: 106, scoreTataKelola: 109, scoreSdm: 107 },
   { id: '12910', kd_wil: '12910', nama: 'P3D Wil. Kab. Pangandaran', namaPendek: 'Kab. Pangandaran', kanwil: 'Korwil Priangan Timur', korwilRomawi: 'Korwil V', klaster: 'Klaster Kecil', lat: -7.7011, lng: 108.4947, scorePendapatan: 116, scoreKepatuhan: 117, scorePelayanan: 92, scoreTataKelola: 93, scoreSdm: 95 },
   { id: '11410', kd_wil: '11410', nama: 'P3D Wil. Kab. Cirebon II Ciledug', namaPendek: 'Kab. Cirebon II Ciledug', kanwil: 'Korwil Ciayumajakuning', korwilRomawi: 'Korwil IV', klaster: 'Klaster Kecil', lat: -6.9011, lng: 108.7210, scorePendapatan: 110, scoreKepatuhan: 113, scorePelayanan: 96, scoreTataKelola: 108, scoreSdm: 99 },
@@ -267,24 +267,24 @@ const rawP3dwList: RawP3dw[] = [
   { id: '12000', kd_wil: '12000', nama: 'P3D Wil. Kota Bandung I Pajajaran', namaPendek: 'Kota Bandung I Pajajaran', kanwil: 'Korwil Bandung Raya', korwilRomawi: 'Korwil III', klaster: 'Klaster Besar', lat: -6.9175, lng: 107.6050, scorePendapatan: 110, scoreKepatuhan: 112, scorePelayanan: 94, scoreTataKelola: 95, scoreSdm: 92 },
   { id: '12010', kd_wil: '12010', nama: 'P3D Wil. Kota Bandung II Kawaluyaan', namaPendek: 'Kota Bandung II Kawaluyaan', kanwil: 'Korwil Bandung Raya', korwilRomawi: 'Korwil III', klaster: 'Klaster Besar', lat: -6.9412, lng: 107.6432, scorePendapatan: 108, scoreKepatuhan: 110, scorePelayanan: 95, scoreTataKelola: 92, scoreSdm: 93 },
   { id: '13100', kd_wil: '13100', nama: 'P3D Wil. Kota Cimahi', namaPendek: 'Kota Cimahi', kanwil: 'Korwil Bandung Raya', korwilRomawi: 'Korwil III', klaster: 'Klaster Sedang', lat: -6.8722, lng: 107.5422, scorePendapatan: 105, scoreKepatuhan: 108, scorePelayanan: 96, scoreTataKelola: 94, scoreSdm: 92 },
-  { id: '11000', kd_wil: '11000', nama: 'P3D Wil. Kab. Karawang', namaPendek: 'Kab. Karawang', kanwil: 'Korwil Purwakarta', korwilRomawi: 'Korwil I', klaster: 'Klaster Besar', lat: -6.3227, lng: 107.3376, scorePendapatan: 106, scoreKepatuhan: 104, scorePelayanan: 94, scoreTataKelola: 92, scoreSdm: 94 },
+  { id: '11000', kd_wil: '11000', nama: 'P3D Wil. Kab. Karawang', namaPendek: 'Kab. Karawang', kanwil: 'Korwil Purwakarta', korwilRomawi: 'Korwil I', klaster: 'Klaster Sedang', lat: -6.3227, lng: 107.3376, scorePendapatan: 106, scoreKepatuhan: 104, scorePelayanan: 94, scoreTataKelola: 92, scoreSdm: 94 },
   { id: '11100', kd_wil: '11100', nama: 'P3D Wil. Kab. Purwakarta', namaPendek: 'Kab. Purwakarta', kanwil: 'Korwil Purwakarta', korwilRomawi: 'Korwil I', klaster: 'Klaster Sedang', lat: -6.5569, lng: 107.4433, scorePendapatan: 104, scoreKepatuhan: 102, scorePelayanan: 92, scoreTataKelola: 90, scoreSdm: 93 },
   { id: '11200', kd_wil: '11200', nama: 'P3D Wil. Kab. Subang', namaPendek: 'Kab. Subang', kanwil: 'Korwil Purwakarta', korwilRomawi: 'Korwil I', klaster: 'Klaster Sedang', lat: -6.5716, lng: 107.7587, scorePendapatan: 102, scoreKepatuhan: 100, scorePelayanan: 90, scoreTataKelola: 92, scoreSdm: 90 },
   { id: '10300', kd_wil: '10300', nama: 'P3D Wil. Kota Bogor', namaPendek: 'Kota Bogor', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Besar', lat: -6.5971, lng: 106.8060, scorePendapatan: 103, scoreKepatuhan: 101, scorePelayanan: 89, scoreTataKelola: 88, scoreSdm: 89 },
   { id: '10200', kd_wil: '10200', nama: 'P3D Wil. Kab. Bogor - Cibinong', namaPendek: 'Kab. Bogor - Cibinong', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Besar', lat: -6.4811, lng: 106.8536, scorePendapatan: 102, scoreKepatuhan: 98, scorePelayanan: 88, scoreTataKelola: 90, scoreSdm: 88 },
   { id: '10400', kd_wil: '10400', nama: 'P3D Wil. Kota Sukabumi', namaPendek: 'Kota Sukabumi', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Sedang', lat: -6.9277, lng: 106.9300, scorePendapatan: 100, scoreKepatuhan: 96, scorePelayanan: 89, scoreTataKelola: 87, scoreSdm: 88 },
   { id: '20100', kd_wil: '20100', nama: 'P3D Wil. Kota Depok I', namaPendek: 'Kota Depok I', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Besar', lat: -6.4025, lng: 106.7942, scorePendapatan: 101, scoreKepatuhan: 98, scorePelayanan: 87, scoreTataKelola: 86, scoreSdm: 88 },
-  { id: '20110', kd_wil: '20110', nama: 'P3D Wil. Kota Depok II Cinere', namaPendek: 'Kota Depok II Cinere', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Sedang', lat: -6.3456, lng: 106.7820, scorePendapatan: 98, scoreKepatuhan: 96, scorePelayanan: 88, scoreTataKelola: 85, scoreSdm: 86 },
+  { id: '20110', kd_wil: '20110', nama: 'P3D Wil. Kota Depok II Cinere', namaPendek: 'Kota Depok II Cinere', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Besar', lat: -6.3456, lng: 106.7820, scorePendapatan: 98, scoreKepatuhan: 96, scorePelayanan: 88, scoreTataKelola: 85, scoreSdm: 86 },
   { id: '20800', kd_wil: '20800', nama: 'P3D Wil. Kota Bekasi', namaPendek: 'Kota Bekasi', kanwil: 'Korwil Purwakarta', korwilRomawi: 'Korwil I', klaster: 'Klaster Besar', lat: -6.2349, lng: 106.9896, scorePendapatan: 96, scoreKepatuhan: 95, scorePelayanan: 86, scoreTataKelola: 88, scoreSdm: 85 },
   { id: '12300', kd_wil: '12300', nama: 'P3D Wil. Kab. Bandung Barat', namaPendek: 'Kab. Bandung Barat', kanwil: 'Korwil Bandung Raya', korwilRomawi: 'Korwil III', klaster: 'Klaster Sedang', lat: -6.8431, lng: 107.5050, scorePendapatan: 95, scoreKepatuhan: 93, scorePelayanan: 87, scoreTataKelola: 85, scoreSdm: 84 },
   { id: '12400', kd_wil: '12400', nama: 'P3D Wil. Kab. Bandung I Rancaekek', namaPendek: 'Kab. Bandung I Rancaekek', kanwil: 'Korwil Bandung Raya', korwilRomawi: 'Korwil III', klaster: 'Klaster Besar', lat: -6.9712, lng: 107.7612, scorePendapatan: 93, scoreKepatuhan: 92, scorePelayanan: 84, scoreTataKelola: 83, scoreSdm: 84 },
   { id: '12410', kd_wil: '12410', nama: 'P3D Wil. Kab. Bandung II Soreang', namaPendek: 'Kab. Bandung II Soreang', kanwil: 'Korwil Bandung Raya', korwilRomawi: 'Korwil III', klaster: 'Klaster Besar', lat: -7.0253, lng: 107.5198, scorePendapatan: 92, scoreKepatuhan: 90, scorePelayanan: 84, scoreTataKelola: 82, scoreSdm: 83 },
-  { id: '12500', kd_wil: '12500', nama: 'P3D Wil. Kab. Sumedang', namaPendek: 'Kab. Sumedang', kanwil: 'Korwil Priangan Timur', korwilRomawi: 'Korwil V', klaster: 'Klaster Sedang', lat: -6.8580, lng: 107.9240, scorePendapatan: 89, scoreKepatuhan: 88, scorePelayanan: 86, scoreTataKelola: 85, scoreSdm: 86 },
-  { id: '12600', kd_wil: '12600', nama: 'P3D Wil. Kab. Garut', namaPendek: 'Kab. Garut', kanwil: 'Korwil Priangan Timur', korwilRomawi: 'Korwil V', klaster: 'Klaster Besar', lat: -7.2278, lng: 107.9087, scorePendapatan: 91, scoreKepatuhan: 90, scorePelayanan: 83, scoreTataKelola: 82, scoreSdm: 82 },
+  { id: '12500', kd_wil: '12500', nama: 'P3D Wil. Kab. Sumedang', namaPendek: 'Kab. Sumedang', kanwil: 'Korwil Priangan Timur', korwilRomawi: 'Korwil V', klaster: 'Klaster Kecil', lat: -6.8580, lng: 107.9240, scorePendapatan: 89, scoreKepatuhan: 88, scorePelayanan: 86, scoreTataKelola: 85, scoreSdm: 86 },
+  { id: '12600', kd_wil: '12600', nama: 'P3D Wil. Kab. Garut', namaPendek: 'Kab. Garut', kanwil: 'Korwil Priangan Timur', korwilRomawi: 'Korwil V', klaster: 'Klaster Sedang', lat: -7.2278, lng: 107.9087, scorePendapatan: 91, scoreKepatuhan: 90, scorePelayanan: 83, scoreTataKelola: 82, scoreSdm: 82 },
   { id: '12700', kd_wil: '12700', nama: 'P3D Wil. Kota Tasikmalaya', namaPendek: 'Kota Tasikmalaya', kanwil: 'Korwil Priangan Timur', korwilRomawi: 'Korwil V', klaster: 'Klaster Sedang', lat: -7.3274, lng: 108.2207, scorePendapatan: 84, scoreKepatuhan: 83, scorePelayanan: 96, scoreTataKelola: 95, scoreSdm: 95 },
   { id: '11300', kd_wil: '11300', nama: 'P3D Wil. Kota Cirebon', namaPendek: 'Kota Cirebon', kanwil: 'Korwil Ciayumajakuning', korwilRomawi: 'Korwil IV', klaster: 'Klaster Sedang', lat: -6.7063, lng: 108.5570, scorePendapatan: 91, scoreKepatuhan: 90, scorePelayanan: 96, scoreTataKelola: 95, scoreSdm: 95 },
-  { id: '11400', kd_wil: '11400', nama: 'P3D Wil. Kab Cirebon I Sumber', namaPendek: 'Kab Cirebon I Sumber', kanwil: 'Korwil Ciayumajakuning', korwilRomawi: 'Korwil IV', klaster: 'Klaster Besar', lat: -6.7320, lng: 108.5523, scorePendapatan: 83, scoreKepatuhan: 82, scorePelayanan: 88, scoreTataKelola: 86, scoreSdm: 87 },
-  { id: '11900', kd_wil: '11900', nama: 'P3D Wil. Kab. Majalengka', namaPendek: 'Kab. Majalengka', kanwil: 'Korwil Ciayumajakuning', korwilRomawi: 'Korwil IV', klaster: 'Klaster Sedang', lat: -6.8361, lng: 108.2278, scorePendapatan: 82, scoreKepatuhan: 81, scorePelayanan: 87, scoreTataKelola: 86, scoreSdm: 87 },
+  { id: '11400', kd_wil: '11400', nama: 'P3D Wil. Kab Cirebon I Sumber', namaPendek: 'Kab Cirebon I Sumber', kanwil: 'Korwil Ciayumajakuning', korwilRomawi: 'Korwil IV', klaster: 'Klaster Sedang', lat: -6.7320, lng: 108.5523, scorePendapatan: 83, scoreKepatuhan: 82, scorePelayanan: 88, scoreTataKelola: 86, scoreSdm: 87 },
+  { id: '11900', kd_wil: '11900', nama: 'P3D Wil. Kab. Majalengka', namaPendek: 'Kab. Majalengka', kanwil: 'Korwil Ciayumajakuning', korwilRomawi: 'Korwil IV', klaster: 'Klaster Kecil', lat: -6.8361, lng: 108.2278, scorePendapatan: 82, scoreKepatuhan: 81, scorePelayanan: 87, scoreTataKelola: 86, scoreSdm: 87 },
   { id: '13300', kd_wil: '13300', nama: 'P3D Wil. Kota Banjar', namaPendek: 'Kota Banjar', kanwil: 'Korwil Priangan Timur', korwilRomawi: 'Korwil V', klaster: 'Klaster Kecil', lat: -7.3736, lng: 108.5342, scorePendapatan: 80, scoreKepatuhan: 79, scorePelayanan: 86, scoreTataKelola: 85, scoreSdm: 86 },
   { id: '10510', kd_wil: '10510', nama: 'P3D Wil. Kab. Sukabumi II Pelabuhan Ratu', namaPendek: 'Kab. Sukabumi II Pelabuhan Ratu', kanwil: 'Korwil Bogor', korwilRomawi: 'Korwil II', klaster: 'Klaster Kecil', lat: -6.9877, lng: 106.5412, scorePendapatan: 76, scoreKepatuhan: 75, scorePelayanan: 86, scoreTataKelola: 85, scoreSdm: 85 },
   { id: '12800', kd_wil: '12800', nama: 'P3D Wil. Kab. Tasikmalaya - Sukaraja', namaPendek: 'Kab. Tasikmalaya - Sukaraja', kanwil: 'Korwil Priangan Timur', korwilRomawi: 'Korwil V', klaster: 'Klaster Sedang', lat: -7.3512, lng: 108.1120, scorePendapatan: 70, scoreKepatuhan: 68, scorePelayanan: 65, scoreTataKelola: 64, scoreSdm: 65 },
@@ -502,7 +502,7 @@ export const mockDetailProfile = {
 // Bobot komponen mengikuti lembar Pembobotan Kriteria Kapus of the Month.
 // Target bertanda * masih berupa usulan dan perlu ditetapkan.
 // ----------------------------------------------------------------------------
-type AreaKey = 'area_a' | 'area_b' | 'area_c' | 'area_d' | 'area_e';
+export type AreaKey = 'area_a' | 'area_b' | 'area_c' | 'area_d' | 'area_e';
 
 export interface KpiDefinition {
   no: number;
@@ -513,43 +513,45 @@ export interface KpiDefinition {
   bobot: number; // bobot komponen (% dari skor akhir)
   batasAtas: 100 | 120;
   capaian: number; // capaian ÷ target × 100 (arah turun: target ÷ capaian × 100), contoh Kota Bandung I
+  rumus: string;
+  sumber: string;
 }
 
 export const KPI_DEFINITIONS: KpiDefinition[] = [
   // SUMBU Y – KINERJA (60%)
   // Area A: Pendapatan (40%)
-  { no: 1, area: 'area_a', nama: 'Pertumbuhan PKB', target: '≥ 5%', arah: 'naik', bobot: 20, batasAtas: 120, capaian: 112.0 },
-  { no: 2, area: 'area_a', nama: 'Pertumbuhan BBNKB', target: '≥ 5%', arah: 'naik', bobot: 10, batasAtas: 120, capaian: 108.0 },
-  { no: 3, area: 'area_a', nama: 'Pertumbuhan PAP', target: '≥ 5%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 104.0 },
-  { no: 4, area: 'area_a', nama: 'Pertumbuhan PAB', target: '≥ 5%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 101.0 },
+  { no: 1, area: 'area_a', nama: 'Pertumbuhan PKB', target: '≥ 5%', arah: 'naik', bobot: 20, batasAtas: 120, capaian: 112.0, rumus: '(Tahun ini − tahun lalu) ÷ tahun lalu × 100%', sumber: 'Sistem Samsat / e-Samsat' },
+  { no: 2, area: 'area_a', nama: 'Pertumbuhan BBNKB', target: '≥ 5%', arah: 'naik', bobot: 10, batasAtas: 120, capaian: 108.0, rumus: '(Tahun ini − tahun lalu) ÷ tahun lalu × 100%', sumber: 'Sistem Samsat / e-Samsat' },
+  { no: 3, area: 'area_a', nama: 'Pertumbuhan PAP', target: '≥ 5%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 104.0, rumus: '(Tahun ini − tahun lalu) ÷ tahun lalu × 100%', sumber: 'Sistem Samsat / e-Samsat' },
+  { no: 4, area: 'area_a', nama: 'Pertumbuhan PAB', target: '≥ 5%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 101.0, rumus: '(Tahun ini − tahun lalu) ÷ tahun lalu × 100%', sumber: 'Sistem Samsat / e-Samsat' },
   // Area B: Kepatuhan WP (20%)
-  { no: 5, area: 'area_b', nama: 'Rasio Kepatuhan Daftar Ulang', target: '≥ 75%', arah: 'naik', bobot: 4, batasAtas: 120, capaian: 101.5 },
-  { no: 6, area: 'area_b', nama: 'Efektivitas Penelusuran – Intensifikasi (Atos Pamor)', target: '≥ 40%*', arah: 'naik', bobot: 2.5, batasAtas: 120, capaian: 105.0 },
-  { no: 7, area: 'area_b', nama: 'Efektivitas Penelusuran – Intensifikasi (Panah Pasopati)', target: '≥ 40%*', arah: 'naik', bobot: 2.5, batasAtas: 120, capaian: 102.0 },
-  { no: 8, area: 'area_b', nama: 'Realisasi Pelaksanaan Opsgab', target: '100%*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 100.0 },
-  { no: 9, area: 'area_b', nama: 'Realisasi Pelaksanaan Opsus', target: '100%*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 98.0 },
-  { no: 10, area: 'area_b', nama: 'Kepatuhan Pajak WP ASN', target: '≥ 90%*', arah: 'naik', bobot: 1, batasAtas: 120, capaian: 96.0 },
-  { no: 11, area: 'area_b', nama: 'Penurunan KBMDU', target: '≥ 10%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 103.0 },
-  { no: 12, area: 'area_b', nama: 'Penurunan KTMDU', target: '≥ 10%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0 },
+  { no: 5, area: 'area_b', nama: 'Rasio Kepatuhan Daftar Ulang', target: '≥ 75%', arah: 'naik', bobot: 4, batasAtas: 120, capaian: 101.5, rumus: 'Ranmor yang bayar daftar ulang tepat waktu ÷ ranmor terdaftar (potensi) × 100%', sumber: 'Database ranmor' },
+  { no: 6, area: 'area_b', nama: 'Efektivitas Penelusuran – Intensifikasi (Atos Pamor)', target: '≥ 40%*', arah: 'naik', bobot: 2.5, batasAtas: 120, capaian: 105.0, rumus: 'KBM yang membayar ÷ KBM yang telah ditelusuri × 100%', sumber: 'Data Atos Pamor' },
+  { no: 7, area: 'area_b', nama: 'Efektivitas Penelusuran – Intensifikasi (Panah Pasopati)', target: '≥ 40%*', arah: 'naik', bobot: 2.5, batasAtas: 120, capaian: 102.0, rumus: 'KBM yang membayar ÷ KBM yang telah ditelusuri × 100%', sumber: 'Data Panah Pasopati' },
+  { no: 8, area: 'area_b', nama: 'Realisasi Pelaksanaan Opsgab', target: '100%*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 100.0, rumus: 'Realisasi KBM dalam kegiatan Opsgab ÷ target KBM Opsgab × 100%', sumber: 'Bidang PP' },
+  { no: 9, area: 'area_b', nama: 'Realisasi Pelaksanaan Opsus', target: '100%*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 98.0, rumus: 'Realisasi PKB, PAP, dan PAB dalam kegiatan Opsus ÷ target Opsus × 100%', sumber: 'Bidang PP' },
+  { no: 10, area: 'area_b', nama: 'Kepatuhan Pajak WP ASN', target: '≥ 90%*', arah: 'naik', bobot: 1, batasAtas: 120, capaian: 96.0, rumus: 'KBM WP ASN yang patuh ÷ potensi KBM WP ASN × 100%', sumber: 'Zonita Pamor' },
+  { no: 11, area: 'area_b', nama: 'Penurunan KBMDU', target: '≥ 10%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 103.0, rumus: '(KBMDU awal − KBMDU akhir) ÷ KBMDU awal × 100%', sumber: 'Database ranmor' },
+  { no: 12, area: 'area_b', nama: 'Penurunan KTMDU', target: '≥ 10%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0, rumus: '(KTMDU awal − KTMDU akhir) ÷ KTMDU awal × 100%', sumber: 'Database ranmor' },
 
   // SUMBU X – POTENSI (40%)
   // Area C: Pelayanan (15%)
-  { no: 13, area: 'area_c', nama: 'Indeks Kepuasan Masyarakat (IKM)', target: '≥ 82', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 106.0 },
-  { no: 14, area: 'area_c', nama: 'Waktu Layanan Daftar Ulang', target: '≤ 20 menit*', arah: 'turun', bobot: 3, batasAtas: 120, capaian: 110.0 },
-  { no: 15, area: 'area_c', nama: 'Adopsi Kanal Digital (Signal, Sambara)', target: '≥ 30%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 104.5 },
-  { no: 16, area: 'area_c', nama: 'Penyelesaian Pengaduan (Drupadi)', target: '≥ 90%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0 },
-  { no: 17, area: 'area_c', nama: 'Review Masyarakat (Google Review)', target: '≥ 4,5*', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 97.8 },
+  { no: 13, area: 'area_c', nama: 'Indeks Kepuasan Masyarakat (IKM)', target: '≥ 82', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 106.0, rumus: 'Survei sesuai PermenPANRB 14/2017', sumber: 'Survei semesteran' },
+  { no: 14, area: 'area_c', nama: 'Waktu Layanan Daftar Ulang', target: '≤ 20 menit*', arah: 'turun', bobot: 3, batasAtas: 120, capaian: 110.0, rumus: 'Rata-rata durasi dari waktu pendaftaran s.d. waktu pembayaran', sumber: 'PSIP' },
+  { no: 15, area: 'area_c', nama: 'Adopsi Kanal Digital (Signal, Sambara)', target: '≥ 30%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 104.5, rumus: 'Transaksi online (Signal, Sambara) ÷ total transaksi × 100%', sumber: 'Sistem' },
+  { no: 16, area: 'area_c', nama: 'Penyelesaian Pengaduan (Drupadi)', target: '≥ 90%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0, rumus: 'Pengaduan selesai ÷ total pengaduan × 100%', sumber: 'Drupadi' },
+  { no: 17, area: 'area_c', nama: 'Review Masyarakat (Google Review)', target: '≥ 4,5*', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 97.8, rumus: 'Rating layanan (skala 1–5)', sumber: 'Google Review' },
   // Area D: Tata Kelola (10%)
-  { no: 18, area: 'area_d', nama: 'Ketepatan Penganggaran Belanja', target: '≥ 95%*', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 103.2 },
-  { no: 19, area: 'area_d', nama: 'Penyelesaian Temuan Audit Internal (Dalev)', target: '100%', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 100.0 },
-  { no: 20, area: 'area_d', nama: 'Penyelesaian Temuan Audit Eksternal (BPK, BPKP, Itjen, Inspektorat)', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0 },
+  { no: 18, area: 'area_d', nama: 'Ketepatan Penganggaran Belanja', target: '≥ 95%*', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 103.2, rumus: 'Realisasi belanja kumulatif ÷ anggaran kas kumulatif × 100%', sumber: 'LPJ Keuangan' },
+  { no: 19, area: 'area_d', nama: 'Penyelesaian Temuan Audit Internal (Dalev)', target: '100%', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 100.0, rumus: 'Temuan Dalev yang ditindaklanjuti ÷ jumlah temuan × 100%', sumber: 'LHP' },
+  { no: 20, area: 'area_d', nama: 'Penyelesaian Temuan Audit Eksternal (BPK, BPKP, Itjen, Inspektorat)', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0, rumus: 'Temuan BPK, BPKP, Itjen, dan Inspektorat yang ditindaklanjuti ÷ jumlah temuan × 100%', sumber: 'LHP' },
   // Area E: SDM dan Koordinasi (15%)
-  { no: 21, area: 'area_e', nama: 'Capaian SKP Pegawai', target: 'Predikat "Baik"', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 100.0 },
-  { no: 22, area: 'area_e', nama: 'Penganggaran Cost Sharing', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0 },
-  { no: 23, area: 'area_e', nama: 'Realisasi Cost Sharing', target: '≥ 95%*', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 101.0 },
-  { no: 24, area: 'area_e', nama: 'Lama Masa Kerja sebagai Kepala P3DW', target: '≥ 24 bulan*', arah: 'naik', bobot: 1, batasAtas: 100, capaian: 116.7 },
-  { no: 25, area: 'area_e', nama: 'Koordinasi dengan Instansi (TPS + BJB, Pemkab/Pemkot)', target: '≥ 12/tahun*', arah: 'naik', bobot: 1, batasAtas: 120, capaian: 100.0 },
-  { no: 26, area: 'area_e', nama: 'Inovasi Layanan', target: '≥ 1/tahun', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0 },
+  { no: 21, area: 'area_e', nama: 'Capaian SKP Pegawai', target: 'Predikat "Baik"', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 100.0, rumus: 'Rata-rata nilai SKP seluruh pegawai P3D', sumber: 'Kepegawaian' },
+  { no: 22, area: 'area_e', nama: 'Penganggaran Cost Sharing', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0, rumus: 'Tahap penganggaran yang tepat sesuai SE ÷ tahap yang sudah berjalan × 100% (Murni dan Perubahan)', sumber: 'Dokumen anggaran Kab/Kota' },
+  { no: 23, area: 'area_e', nama: 'Realisasi Cost Sharing', target: '≥ 95%*', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 101.0, rumus: 'Realisasi belanja cost sharing ÷ anggaran cost sharing × 100%', sumber: 'Realisasi cost sharing Kab/Kota' },
+  { no: 24, area: 'area_e', nama: 'Lama Masa Kerja sebagai Kepala P3DW', target: '≥ 24 bulan*', arah: 'naik', bobot: 1, batasAtas: 100, capaian: 116.7, rumus: 'Lama masa kerja sebagai Kepala P3DW', sumber: 'Kepegawaian' },
+  { no: 25, area: 'area_e', nama: 'Koordinasi dengan Instansi (TPS + BJB, Pemkab/Pemkot)', target: '≥ 12/tahun*', arah: 'naik', bobot: 1, batasAtas: 120, capaian: 100.0, rumus: 'Belum ada parameter; sementara jumlah kegiatan koordinasi s.d. periode', sumber: 'Notulen' },
+  { no: 26, area: 'area_e', nama: 'Inovasi Layanan', target: '≥ 1/tahun', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0, rumus: 'Jumlah inovasi layanan yang diterapkan', sumber: 'Laporan inovasi' },
 ];
 
 export interface TrenPenilaianRow {
@@ -568,7 +570,7 @@ export interface TrenPenilaianRow {
   batasAtas?: number; // khusus baris KPI
 }
 
-const AREA_GROUPS: { id: AreaKey; sumbu: 'sumbu_y' | 'sumbu_x'; nama: string }[] = [
+export const AREA_GROUPS: { id: AreaKey; sumbu: 'sumbu_y' | 'sumbu_x'; nama: string }[] = [
   { id: 'area_a', sumbu: 'sumbu_y', nama: 'Area A: Pendapatan' },
   { id: 'area_b', sumbu: 'sumbu_y', nama: 'Area B: Kepatuhan WP' },
   { id: 'area_c', sumbu: 'sumbu_x', nama: 'Area C: Pelayanan' },
