@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import NineBoxExplanationModal from '@/components/ui/NineBoxExplanationModal';
 import TalentBoxMatrix, { MatrixLegend } from '@/components/charts/TalentBoxMatrix';
-import { mockScatterData } from '@/services/dashboardMockData';
+import { PERIODE_BERJALAN, getEvaluasiSemua } from '@/services/periodeData';
 
 interface MiniNineBoxCardProps {
   boxNumber?: number;
@@ -11,6 +11,8 @@ interface MiniNineBoxCardProps {
   potensi?: number;
   unitName?: string;
   unitId?: string;
+  /** Periode penilaian; posisi semua unit mengikuti bulan ini. */
+  periodeKey?: string;
 }
 
 export const MiniNineBoxCard: React.FC<MiniNineBoxCardProps> = ({
@@ -20,7 +22,9 @@ export const MiniNineBoxCard: React.FC<MiniNineBoxCardProps> = ({
   potensi = 105.2,
   unitName = 'Unit Kerja',
   unitId,
+  periodeKey = PERIODE_BERJALAN.key,
 }) => {
+  const semuaUnit = getEvaluasiSemua(periodeKey);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalBox, setModalBox] = useState<number>(boxNumber);
 
@@ -57,13 +61,13 @@ export const MiniNineBoxCard: React.FC<MiniNineBoxCardProps> = ({
           showCounts
           focusId={unitId}
           onBoxClick={openGuide}
-          muted={new Set(mockScatterData.filter((item) => item.id !== unitId).map((item) => item.id))}
-          points={mockScatterData.map((item) => ({
+          muted={new Set(semuaUnit.filter((item) => item.id !== unitId).map((item) => item.id))}
+          points={semuaUnit.map((item) => ({
             id: item.id,
             label: item.nama,
             x: item.id === unitId ? potensi : item.x,
             y: item.id === unitId ? kinerja : item.y,
-            final: item.skorTotal,
+            final: item.total,
             sub: item.korwil,
           }))}
         />

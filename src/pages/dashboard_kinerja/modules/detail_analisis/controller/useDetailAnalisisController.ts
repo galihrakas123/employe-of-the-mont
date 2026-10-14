@@ -5,10 +5,11 @@ import {
   P3dwLeaderboardData,
   P3dwScatterData,
 } from '@/services/dashboardMockData';
+import { PERIODE_BERJALAN, getEvaluasi, getPeriode } from '@/services/periodeData';
 
 export const useDetailAnalisisController = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const unitId = searchParams.get('id') || '1';
 
   // Cari data dari leaderboard
@@ -21,6 +22,18 @@ export const useDetailAnalisisController = () => {
   const scatterData: P3dwScatterData =
     mockScatterData.find((item) => item.id === unitData.id || item.nama === unitData.namaP3dw) ||
     mockScatterData[0];
+
+  // Periode penilaian yang ditinjau (disimpan di URL ?periode=YYYY-MM); bawaan = bulan berjalan
+  const periode = getPeriode(searchParams.get('periode'));
+  const isPeriodeBerjalan = periode.key === PERIODE_BERJALAN.key;
+  const evaluasi = getEvaluasi(unitData.id, periode.key);
+
+  const setPeriode = (key: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === PERIODE_BERJALAN.key) next.delete('periode');
+    else next.set('periode', key);
+    setSearchParams(next, { replace: true });
+  };
 
   const handleBack = () => {
     navigate('/beranda');
@@ -48,6 +61,10 @@ export const useDetailAnalisisController = () => {
     unitData,
     scatterData,
     getKategoriBadgeStyle,
+    periode,
+    isPeriodeBerjalan,
+    evaluasi,
+    setPeriode,
   };
 };
 

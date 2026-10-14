@@ -110,6 +110,17 @@ export function getBoxByCoordinates(y: number, x: number): {
   }
 }
 
+export type Kategori = 'Sangat Baik' | 'Baik' | 'Cukup' | 'Kurang' | 'Perlu Pembinaan';
+
+// Kategori status unit (badge) dari posisi box dan skor akhir
+export function getKategori(boxNumber: number, skorTotal: number): Kategori {
+  if (boxNumber === 9 || skorTotal >= 110) return 'Sangat Baik';
+  if (boxNumber === 8 || boxNumber === 6 || skorTotal >= 90) return 'Baik';
+  if (boxNumber === 5 || boxNumber === 7 || boxNumber === 3 || skorTotal >= 70) return 'Cukup';
+  if (boxNumber === 2 || boxNumber === 4) return 'Kurang';
+  return 'Perlu Pembinaan';
+}
+
 // Helper predikat skor akhir sesuai tabel 3 Dokumen & referensi visual
 export function getPredikatBySkor(skorAkhir: number): {
   predikat: 'Sangat baik' | 'Baik' | 'Cukup' | 'Kurang';
@@ -316,12 +327,7 @@ const calculatedP3dwList = rawP3dwList.map((raw) => {
   const boxInfo = getBoxByCoordinates(y, x);
   const predikatInfo = getPredikatBySkor(skorTotal);
 
-  let kategori: 'Sangat Baik' | 'Baik' | 'Cukup' | 'Kurang' | 'Perlu Pembinaan' = 'Baik';
-  if (boxInfo.boxNumber === 9 || skorTotal >= 110) kategori = 'Sangat Baik';
-  else if (boxInfo.boxNumber === 8 || boxInfo.boxNumber === 6 || skorTotal >= 90) kategori = 'Baik';
-  else if (boxInfo.boxNumber === 5 || boxInfo.boxNumber === 7 || boxInfo.boxNumber === 3 || skorTotal >= 70) kategori = 'Cukup';
-  else if (boxInfo.boxNumber === 2 || boxInfo.boxNumber === 4) kategori = 'Kurang';
-  else kategori = 'Perlu Pembinaan';
+  const kategori = getKategori(boxInfo.boxNumber, skorTotal);
 
   return {
     ...raw,
