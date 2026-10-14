@@ -24,8 +24,10 @@ interface TalentBoxMatrixProps {
   /** Titik terpilih (diberi cincin), untuk mode pilih. */
   selectedId?: string;
   onSelect?: (id: string) => void;
-  /** Titik yang diredupkan (mis. tidak lolos filter). */
+  /** Titik yang diredupkan (mis. tidak lolos filter). Tidak ikut dihitung. */
   dimmed?: Set<string>;
+  /** Titik yang hanya dibuat agak transparan (mis. unit lain di halaman detail). Tetap dihitung. */
+  muted?: Set<string>;
   /** Tampilkan jumlah unit per box. */
   showCounts?: boolean;
   /** Versi ringkas untuk kolom sempit: tiap box hanya menampilkan nama singkatnya. */
@@ -121,6 +123,7 @@ export const TalentBoxMatrix: React.FC<TalentBoxMatrixProps> = ({
   selectedId,
   onSelect,
   dimmed,
+  muted,
   showCounts,
   compact: compactProp,
   onBoxClick,
@@ -243,6 +246,7 @@ export const TalentBoxMatrix: React.FC<TalentBoxMatrixProps> = ({
           const isFocus = p.id === focusId;
           const isSelected = p.id === selectedId;
           const isDim = dimmed?.has(p.id);
+          const isMuted = muted?.has(p.id);
           const color = p.final !== undefined ? PREDIKAT_COLOR[getPredikatBySkor(p.final).predikat] : '#00875A';
           const size = isFocus ? 22 : 12;
           const transform = `translate(-50%, 50%) scale(${isSelected ? 1.3 : hoverId === p.id ? 1.35 : 1})`;
@@ -268,7 +272,7 @@ export const TalentBoxMatrix: React.FC<TalentBoxMatrixProps> = ({
                 borderWidth: isFocus ? 3 : 2,
                 backgroundColor: color,
                 transform,
-                opacity: isDim ? 0.18 : 1,
+                opacity: isDim ? 0.18 : isMuted ? 0.35 : 1,
                 zIndex: hoverId === p.id ? 4 : isSelected ? 5 : isFocus ? 3 : 2,
                 boxShadow: isSelected
                   ? `0 0 0 4px ${color}66, 0 4px 6px -1px rgba(0,0,0,0.15)`

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import NineBoxExplanationModal from '@/components/ui/NineBoxExplanationModal';
-import TalentBoxMatrix from '@/components/charts/TalentBoxMatrix';
+import TalentBoxMatrix, { MatrixLegend } from '@/components/charts/TalentBoxMatrix';
 import { mockScatterData } from '@/services/dashboardMockData';
 
 interface MiniNineBoxCardProps {
@@ -22,6 +22,12 @@ export const MiniNineBoxCard: React.FC<MiniNineBoxCardProps> = ({
   unitId,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalBox, setModalBox] = useState<number>(boxNumber);
+
+  const openGuide = (no: number) => {
+    setModalBox(no);
+    setIsModalOpen(true);
+  };
 
   return (
     <>
@@ -33,13 +39,13 @@ export const MiniNineBoxCard: React.FC<MiniNineBoxCardProps> = ({
               Matriks Kinerja dan Potensi
             </h4>
             <p className="text-[12px] text-[#757575] dark:text-[#94A3B8] mt-0.5">
-              Posisi {unitName} pada sembilan kuadran evaluasi kinerja. Titik samar = unit lain.
+              Posisi {unitName} (titik besar) di antara 34 P3DW
             </p>
           </div>
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="text-[11px] font-medium text-[#00875A] hover:text-[#006644] hover:underline inline-flex items-center gap-1 cursor-pointer shrink-0"
+            onClick={() => openGuide(boxNumber)}
+            className="text-[11px] font-medium text-[#00875A] hover:text-[#006644] hover:underline inline-flex items-center gap-1 cursor-pointer shrink-0 py-1 px-2.5 rounded-lg bg-[#E6F4EA]/70 hover:bg-[#E6F4EA] transition"
             title="Lihat penjelasan dan panduan untuk tiap box"
           >
             <HelpCircle size={13} />
@@ -48,10 +54,10 @@ export const MiniNineBoxCard: React.FC<MiniNineBoxCardProps> = ({
         </div>
 
         <TalentBoxMatrix
-          compact
+          showCounts
           focusId={unitId}
-          onBoxClick={() => setIsModalOpen(true)}
-          dimmed={new Set(mockScatterData.filter((item) => item.id !== unitId).map((item) => item.id))}
+          onBoxClick={openGuide}
+          muted={new Set(mockScatterData.filter((item) => item.id !== unitId).map((item) => item.id))}
           points={mockScatterData.map((item) => ({
             id: item.id,
             label: item.nama,
@@ -61,12 +67,13 @@ export const MiniNineBoxCard: React.FC<MiniNineBoxCardProps> = ({
             sub: item.korwil,
           }))}
         />
+        <MatrixLegend />
 
         {/* Tombol Info Posisi Unit Kuadran */}
         <div className="mt-4 text-center">
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => openGuide(boxNumber)}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold bg-[#E6F4EA] text-[#00875A] border border-[#00875A]/20 hover:bg-[#D4EDDA] transition cursor-pointer shadow-2xs"
             title="Klik untuk panduan lengkap kuadran ini"
           >
@@ -79,7 +86,7 @@ export const MiniNineBoxCard: React.FC<MiniNineBoxCardProps> = ({
       <NineBoxExplanationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        initialBoxNumber={boxNumber}
+        initialBoxNumber={modalBox}
       />
     </>
   );
