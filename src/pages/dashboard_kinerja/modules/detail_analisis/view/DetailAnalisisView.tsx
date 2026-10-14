@@ -17,7 +17,7 @@ export const DetailAnalisisView: React.FC = () => {
     <div className="font-roboto pb-12 antialiased">
       {/* Top Header Bar - Full-bleed nempel bagian atas & samping (Gambar Referensi Kedua) */}
       <div className="w-full bg-white border-b border-[#E0E0E0] sticky top-16 z-30 shadow-xs">
-        <div className="max-w-[1500px] mx-auto px-6 lg:px-7 py-3.5 sm:py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="w-full px-4 sm:px-6 lg:px-7 py-3.5 sm:py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Left Side: Back Button & Unit Title */}
           <div className="flex items-center gap-3.5">
             <button
@@ -81,8 +81,8 @@ export const DetailAnalisisView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Page Content - Terpusat dengan Padding Konten Standar max-w-[1500px] */}
-      <div className="max-w-[1500px] mx-auto p-6 lg:p-7 space-y-6">
+      {/* Main Page Content - Selebar area konten */}
+      <div className="w-full p-4 sm:p-6 lg:p-7 space-y-6">
         {/* Main Grid: Left 2/3 & Right 1/3 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Left Column (2 Cols) */}
@@ -127,7 +127,7 @@ export const DetailAnalisisView: React.FC = () => {
           </div>
 
           {/* Right Column (1 Col) - Sticky saat scroll */}
-          <div className="lg:col-span-1 space-y-6 sticky top-[152px]">
+          <div className="lg:col-span-1 space-y-6">
             {/* Matriks Kinerja dan Potensial (Mini 9-Box dengan Sumbu X & Y) */}
             <MiniNineBoxCard
               boxNumber={scatterData.boxNumber}
@@ -135,6 +135,7 @@ export const DetailAnalisisView: React.FC = () => {
               kinerja={scatterData.y}
               potensi={scatterData.x}
               unitName={unitData.namaP3dw}
+              unitId={scatterData.id}
             />
 
             {/* Nilai Sumbu Evaluasi */}

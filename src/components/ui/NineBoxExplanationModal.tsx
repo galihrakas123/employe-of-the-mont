@@ -137,9 +137,12 @@ export const NineBoxExplanationModal: React.FC<NineBoxExplanationModalProps> = (
                       </span>
                     )}
                   </div>
-                  <span className="text-[12px] font-semibold text-[#64748B] dark:text-[#94A3B8] bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md self-start sm:self-auto">
-                    {box.level}
-                  </span>
+                  <div className="flex flex-col items-start sm:items-end gap-1 self-start sm:self-auto">
+                    <span className="text-[12px] font-semibold text-[#64748B] dark:text-[#94A3B8] bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
+                      {box.level}
+                    </span>
+                    <span className="text-[11px] italic text-[#94A3B8]">{box.label}</span>
+                  </div>
                 </div>
 
                 {/* Grid 2 Kolom: Kondisi & Makna */}

@@ -1,15 +1,15 @@
 // ============================================================================
 // TALENT BOX KPI KEPALA PUSAT CABANG SAMSAT (BAPENDA JAWA BARAT)
 // Standar Baku Berdasarkan Dokumen Resmi:
-// - Sumbu Y (Kinerja): Meningkatnya Kemandirian Keuangan Daerah (55%)
-//   Area 1: Pendapatan (5 KPI, bobot 35%)
-//   Area 2: Kepatuhan WP (4 KPI, bobot 20%)
-// - Sumbu X (Potensi): Meningkatnya Kualitas Pelayanan Publik (45%)
-//   Area 3: Pelayanan (3 KPI, bobot 25%)
-//   Area 4: Tata Kelola (2 KPI, bobot 5%)
-//   Area 5: SDM & Koordinasi (4 KPI, bobot 15%)
+// - Sumbu Y (Kinerja – Realisasi & Potensi Pajak): Meningkatnya Kemandirian Keuangan Daerah (60%)
+//   Area A: Pendapatan (4 KPI, bobot 40%)
+//   Area B: Kepatuhan WP (8 KPI, bobot 20%)
+// - Sumbu X (Potensi – Layanan & Kepuasan Masyarakat): Meningkatnya Kualitas Pelayanan Publik (40%)
+//   Area C: Pelayanan (5 KPI, bobot 15%)
+//   Area D: Tata Kelola (3 KPI, bobot 10%)
+//   Area E: SDM dan Koordinasi (6 KPI, bobot 15%)
 //
-// Rumus Skor Akhir: 0.55 * Skor Y + 0.45 * Skor X
+// Rumus Skor Akhir: 0.60 * Skor Y + 0.40 * Skor X
 // Batas Kategori Sumbu:
 // - Kinerja (Y): Tinggi >= 100, Sedang 90-99.9, Rendah < 90
 // - Potensi (X): Tinggi >= 95, Sedang 85-94.9, Rendah < 85
@@ -44,10 +44,10 @@ export interface P3dwLeaderboardData {
   totalSkor: number;
   predikat: 'Sangat baik' | 'Baik' | 'Cukup' | 'Kurang';
   grade: 'A' | 'B' | 'C' | 'D';
-  scorePendapatan: number; // 35%
+  scorePendapatan: number; // 40%
   scoreKepatuhan: number;  // 20%
-  scorePelayanan: number;  // 25%
-  scoreTataKelola: number; // 5%
+  scorePelayanan: number;  // 15%
+  scoreTataKelola: number; // 10%
   scoreSdm: number;        // 15%
   pendapatanScore?: number;
   kepatuhanScore?: number;
@@ -55,13 +55,13 @@ export interface P3dwLeaderboardData {
   tataKelolaScore?: number;
   sdmScore?: number;
   // Backward-compatible alias fields:
-  scoreA: number; // 35% Pendapatan
+  scoreA: number; // 40% Pendapatan
   scoreB: number; // 20% Kepatuhan
-  scoreC: number; // 25% Pelayanan
-  scoreD: number; // 5% Tata Kelola
-  scoreE: number; // 15% SDM & Koordinasi
-  skorY: number;  // Kinerja (55%)
-  skorX: number;  // Potensi (45%)
+  scoreC: number; // 15% Pelayanan
+  scoreD: number; // 10% Tata Kelola
+  scoreE: number; // 15% SDM dan Koordinasi
+  skorY: number;  // Kinerja (60%)
+  skorX: number;  // Potensi (40%)
   boxNumber: number;
   boxName: string;
   klaster: 'Klaster Besar' | 'Klaster Sedang' | 'Klaster Kecil';
@@ -155,9 +155,9 @@ export function getGridCoordinates(x: number, y: number): { left: string; top: s
 // ----------------------------------------------------------------------------
 // DATA MENTAH 34 P3DW SE-JAWA BARAT
 // Dihitung 100% konsisten sesuai bobot pilar:
-// Sumbu Y = (0.35 * Pendapatan + 0.20 * Kepatuhan) / 0.55
-// Sumbu X = (0.25 * Pelayanan + 0.05 * TataKelola + 0.15 * SDM) / 0.45
-// Skor Akhir = 0.55 * Y + 0.45 * X
+// Sumbu Y = (0.40 * Pendapatan + 0.20 * Kepatuhan) / 0.60
+// Sumbu X = (0.15 * Pelayanan + 0.10 * TataKelola + 0.15 * SDM) / 0.40
+// Skor Akhir = 0.60 * Y + 0.40 * X
 // ----------------------------------------------------------------------------
 
 interface RawP3dw {
@@ -170,10 +170,10 @@ interface RawP3dw {
   klaster: 'Klaster Besar' | 'Klaster Sedang' | 'Klaster Kecil';
   lat: number;
   lng: number;
-  scorePendapatan: number; // 35%
+  scorePendapatan: number; // 40%
   scoreKepatuhan: number;  // 20%
-  scorePelayanan: number;  // 25%
-  scoreTataKelola: number; // 5%
+  scorePelayanan: number;  // 15%
+  scoreTataKelola: number; // 10%
   scoreSdm: number;        // 15%
 }
 
@@ -291,13 +291,27 @@ const rawP3dwList: RawP3dw[] = [
 ];
 
 // Helper kalkulasi otomatis seluruh list dengan presisi tinggi
+// Bobot inti per area (lembar Pembobotan Kriteria Kapus of the Month, 14 Okt 2026)
+export const AREA_WEIGHTS = {
+  pendapatan: 0.40,
+  kepatuhan: 0.20,
+  pelayanan: 0.15,
+  tataKelola: 0.10,
+  sdm: 0.15,
+} as const;
+export const SUMBU_Y_WEIGHT = AREA_WEIGHTS.pendapatan + AREA_WEIGHTS.kepatuhan; // 0.60
+export const SUMBU_X_WEIGHT = AREA_WEIGHTS.pelayanan + AREA_WEIGHTS.tataKelola + AREA_WEIGHTS.sdm; // 0.40
+
 const calculatedP3dwList = rawP3dwList.map((raw) => {
-  // Sumbu Y = (0.35 * Pendapatan + 0.20 * Kepatuhan) / 0.55
-  const y = Math.round(((raw.scorePendapatan * 0.35 + raw.scoreKepatuhan * 0.20) / 0.55) * 10) / 10;
-  // Sumbu X = (0.25 * Pelayanan + 0.05 * TataKelola + 0.15 * SDM) / 0.45
-  const x = Math.round(((raw.scorePelayanan * 0.25 + raw.scoreTataKelola * 0.05 + raw.scoreSdm * 0.15) / 0.45) * 10) / 10;
-  // Skor Akhir = 0.35 * A + 0.20 * B + 0.25 * C + 0.05 * D + 0.15 * E
-  const skorTotal = Math.round((raw.scorePendapatan * 0.35 + raw.scoreKepatuhan * 0.20 + raw.scorePelayanan * 0.25 + raw.scoreTataKelola * 0.05 + raw.scoreSdm * 0.15) * 10) / 10;
+  const w = AREA_WEIGHTS;
+  const poinY = raw.scorePendapatan * w.pendapatan + raw.scoreKepatuhan * w.kepatuhan;
+  const poinX = raw.scorePelayanan * w.pelayanan + raw.scoreTataKelola * w.tataKelola + raw.scoreSdm * w.sdm;
+  // Sumbu Y = (0.40 * Pendapatan + 0.20 * Kepatuhan) / 0.60
+  const y = Math.round((poinY / SUMBU_Y_WEIGHT) * 10) / 10;
+  // Sumbu X = (0.15 * Pelayanan + 0.10 * TataKelola + 0.15 * SDM) / 0.40
+  const x = Math.round((poinX / SUMBU_X_WEIGHT) * 10) / 10;
+  // Skor Akhir = 0.40 * A + 0.20 * B + 0.15 * C + 0.10 * D + 0.15 * E
+  const skorTotal = Math.round((poinY + poinX) * 10) / 10;
 
   const boxInfo = getBoxByCoordinates(y, x);
   const predikatInfo = getPredikatBySkor(skorTotal);
@@ -400,7 +414,7 @@ export const mockDashboardMetrics = {
   cabangBintang: countBox9.toString(),
   cabangBintangSub: 'Peraih Kapus of the Month (Box 9)',
   realisasiPku: `${avgPkb}%`,
-  realisasiPkuSub: 'Total capaian PKB & Pendapatan',
+  realisasiPkuSub: 'Rata-rata skor Area A (pertumbuhan PKB, BBNKB, PAP, PAB)',
   unitPerhatian: countBox1.toString(),
   unitPerhatianSub: 'Prioritas pembinaan (Box 1)',
 };
@@ -447,7 +461,7 @@ export const mockKpiTopCards = [
     type: 'star',
   },
   {
-    title: 'Realisasi Pendapatan vs Target',
+    title: 'Capaian Area Pendapatan',
     value: `${avgPkb}%`,
     subtitle: 'Rata-rata capaian 34 P3DW s.d. Oktober',
     topColor: 'border-t-blue-500',
@@ -484,51 +498,144 @@ export const mockDetailProfile = {
 };
 
 // ----------------------------------------------------------------------------
-// RINCIAN 18 KPI SESUAI BAB 2 DOKUMEN TALENT BOX
+// RINCIAN 26 KPI SESUAI BAB 2 DOKUMEN TALENT BOX
+// Bobot komponen mengikuti lembar Pembobotan Kriteria Kapus of the Month.
+// Target bertanda * masih berupa usulan dan perlu ditetapkan.
 // ----------------------------------------------------------------------------
-export const mockTrenPenilaianData = [
-  { id: 'total', level: 0, komponen: 'Skor Akhir (Total 5 Area)', bobot: '100', capaian: '104,1', skor: '104,1', poin: '104,1', isTotal: true },
+type AreaKey = 'area_a' | 'area_b' | 'area_c' | 'area_d' | 'area_e';
 
-  // SUMBU Y - KINERJA (55%)
-  { id: 'sumbu_y', level: 1, komponen: 'Sumbu Y – Kinerja: Kemandirian Keuangan Daerah', bobot: '55', capaian: '106,1', skor: '106,1', poin: '58,4' },
+export interface KpiDefinition {
+  no: number;
+  area: AreaKey;
+  nama: string;
+  target: string;
+  arah: 'naik' | 'turun'; // naik: makin tinggi makin baik, turun: makin rendah makin baik
+  bobot: number; // bobot komponen (% dari skor akhir)
+  batasAtas: 100 | 120;
+  capaian: number; // capaian ÷ target × 100 (arah turun: target ÷ capaian × 100), contoh Kota Bandung I
+}
 
-  // AREA 1: PENDAPATAN (35%)
-  { id: 'area_1', level: 2, komponen: 'Area 1: Pendapatan', bobot: '35', capaian: '108,5', skor: '108,5', poin: '38,0' },
-  { id: 'kpi_1', level: 3, komponen: '1. Realisasi PKB', bobot: '15', target: '100%', capaian: '109,2', skor: '109,2', poin: '16,4' },
-  { id: 'kpi_2', level: 3, komponen: '2. Realisasi BBNKB', bobot: '10', target: '100%', capaian: '108,4', skor: '108,4', poin: '10,8' },
-  { id: 'kpi_3', level: 3, komponen: '3. Realisasi Pajak Air Permukaan (PAP)', bobot: '3', target: '100%', capaian: '105,0', skor: '105,0', poin: '3,2' },
-  { id: 'kpi_4', level: 3, komponen: '4. Realisasi Pajak Alat Berat (PAB)', bobot: '2', target: '100%', capaian: '102,0', skor: '102,0', poin: '2,0' },
-  { id: 'kpi_5', level: 3, komponen: '5. Pertumbuhan Pendapatan (PKB, BBNKB, PAP, PAB)', bobot: '5', target: '≥ 5%', capaian: '112,0', skor: '112,0', poin: '5,6' },
+export const KPI_DEFINITIONS: KpiDefinition[] = [
+  // SUMBU Y – KINERJA (60%)
+  // Area A: Pendapatan (40%)
+  { no: 1, area: 'area_a', nama: 'Pertumbuhan PKB', target: '≥ 5%', arah: 'naik', bobot: 20, batasAtas: 120, capaian: 112.0 },
+  { no: 2, area: 'area_a', nama: 'Pertumbuhan BBNKB', target: '≥ 5%', arah: 'naik', bobot: 10, batasAtas: 120, capaian: 108.0 },
+  { no: 3, area: 'area_a', nama: 'Pertumbuhan PAP', target: '≥ 5%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 104.0 },
+  { no: 4, area: 'area_a', nama: 'Pertumbuhan PAB', target: '≥ 5%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 101.0 },
+  // Area B: Kepatuhan WP (20%)
+  { no: 5, area: 'area_b', nama: 'Rasio Kepatuhan Daftar Ulang', target: '≥ 75%', arah: 'naik', bobot: 4, batasAtas: 120, capaian: 101.5 },
+  { no: 6, area: 'area_b', nama: 'Efektivitas Penelusuran – Intensifikasi (Atos Pamor)', target: '≥ 40%*', arah: 'naik', bobot: 2.5, batasAtas: 120, capaian: 105.0 },
+  { no: 7, area: 'area_b', nama: 'Efektivitas Penelusuran – Intensifikasi (Panah Pasopati)', target: '≥ 40%*', arah: 'naik', bobot: 2.5, batasAtas: 120, capaian: 102.0 },
+  { no: 8, area: 'area_b', nama: 'Realisasi Pelaksanaan Opsgab', target: '100%*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 100.0 },
+  { no: 9, area: 'area_b', nama: 'Realisasi Pelaksanaan Opsus', target: '100%*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 98.0 },
+  { no: 10, area: 'area_b', nama: 'Kepatuhan Pajak WP ASN', target: '≥ 90%*', arah: 'naik', bobot: 1, batasAtas: 120, capaian: 96.0 },
+  { no: 11, area: 'area_b', nama: 'Penurunan KBMDU', target: '≥ 10%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 103.0 },
+  { no: 12, area: 'area_b', nama: 'Penurunan KTMDU', target: '≥ 10%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0 },
 
-  // AREA 2: KEPATUHAN WP (20%)
-  { id: 'area_2', level: 2, komponen: 'Area 2: Kepatuhan WP', bobot: '20', capaian: '102,0', skor: '102,0', poin: '20,4' },
-  { id: 'kpi_6', level: 3, komponen: '6. Rasio Kepatuhan (WP Taat)', bobot: '7', target: '≥ 75%', capaian: '101,5', skor: '101,5', poin: '7,1' },
-  { id: 'kpi_7', level: 3, komponen: '7. Penelusuran Objek Tunggakan (Atos Pamor)', bobot: '5', target: '100%', capaian: '104,0', skor: '104,0', poin: '5,2' },
-  { id: 'kpi_8', level: 3, komponen: '8. Penelusuran Tunggakan Mandiri (Panah Pasopati)', bobot: '4', target: '100%', capaian: '102,5', skor: '102,5', poin: '4,1' },
-  { id: 'kpi_9', level: 3, komponen: '9. Penurunan KTMDU', bobot: '4', target: '≥ 10%', capaian: '100,0', skor: '100,0', poin: '4,0' },
-
-  // SUMBU X - POTENSI (45%)
-  { id: 'sumbu_x', level: 1, komponen: 'Sumbu X – Potensi: Kualitas Pelayanan Publik', bobot: '45', capaian: '101,6', skor: '101,6', poin: '45,7' },
-
-  // AREA 3: PELAYANAN (25%)
-  { id: 'area_3', level: 2, komponen: 'Area 3: Pelayanan', bobot: '25', capaian: '104,0', skor: '104,0', poin: '26,0' },
-  { id: 'kpi_10', level: 3, komponen: '10. IKM / Nilai SKM', bobot: '9', target: '≥ 82', capaian: '106,0', skor: '106,0', poin: '9,5' },
-  { id: 'kpi_11', level: 3, komponen: '11. Adopsi Kanal Digital (Signal & Sambara)', bobot: '11', target: '≥ 30%', capaian: '104,5', skor: '104,5', poin: '11,5' },
-  { id: 'kpi_12', level: 3, komponen: '12. Penyelesaian Pengaduan (SLA)', bobot: '5', target: '≥ 90%', capaian: '100,0', skor: '100,0', poin: '5,0' },
-
-  // AREA 4: TATA KELOLA (10%)
-  { id: 'area_4', level: 2, komponen: 'Area 4: Tata Kelola', bobot: '10', capaian: '100,0', skor: '100,0', poin: '10,0' },
-  { id: 'kpi_13', level: 3, komponen: '13. Tindak Lanjut Temuan Audit', bobot: '3', target: '100%', capaian: '100,0', skor: '100,0', poin: '3,0' },
-  { id: 'kpi_14', level: 3, komponen: '14. Kesiapan Pejabat Pengadaan (Sertifikasi PBJ & Status PPK)', bobot: '2', target: '100%', capaian: '100,0', skor: '100,0', poin: '2,0' },
-  { id: 'kpi_15', level: 3, komponen: '15. Penyerapan Anggaran', bobot: '5', target: '≥ 95%', capaian: '98,0', skor: '100,0', poin: '5,0' },
-
-  // AREA 5: SDM & KOORDINASI (15%)
-  { id: 'area_5', level: 2, komponen: 'Area 5: SDM & Koordinasi', bobot: '15', capaian: '98,0', skor: '98,0', poin: '14,7' },
-  { id: 'kpi_16', level: 3, komponen: '16. Capaian SKP Pegawai', bobot: '4', target: 'Predikat "Baik"', capaian: '100,0', skor: '100,0', poin: '4,0' },
-  { id: 'kpi_17', level: 3, komponen: '17. Koordinasi Tim Pembina Samsat (Polri & Jasa Raharja)', bobot: '3', target: '≥ 12/tahun', capaian: '100,0', skor: '100,0', poin: '3,0' },
-  { id: 'kpi_18', level: 3, komponen: '18. Kegiatan Cost Sharing Kabupaten/Kota', bobot: '5', target: '≥ 95%', capaian: '96,0', skor: '96,0', poin: '4,8' },
-  { id: 'kpi_19', level: 3, komponen: '19. Inovasi Layanan', bobot: '3', target: '≥ 1/tahun', capaian: '100,0', skor: '100,0', poin: '3,0' },
+  // SUMBU X – POTENSI (40%)
+  // Area C: Pelayanan (15%)
+  { no: 13, area: 'area_c', nama: 'Indeks Kepuasan Masyarakat (IKM)', target: '≥ 82', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 106.0 },
+  { no: 14, area: 'area_c', nama: 'Waktu Layanan Daftar Ulang', target: '≤ 20 menit*', arah: 'turun', bobot: 3, batasAtas: 120, capaian: 110.0 },
+  { no: 15, area: 'area_c', nama: 'Adopsi Kanal Digital (Signal, Sambara)', target: '≥ 30%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 104.5 },
+  { no: 16, area: 'area_c', nama: 'Penyelesaian Pengaduan (Drupadi)', target: '≥ 90%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0 },
+  { no: 17, area: 'area_c', nama: 'Review Masyarakat (Google Review)', target: '≥ 4,5*', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 97.8 },
+  // Area D: Tata Kelola (10%)
+  { no: 18, area: 'area_d', nama: 'Ketepatan Penganggaran Belanja', target: '≥ 95%*', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 103.2 },
+  { no: 19, area: 'area_d', nama: 'Penyelesaian Temuan Audit Internal (Dalev)', target: '100%', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 100.0 },
+  { no: 20, area: 'area_d', nama: 'Penyelesaian Temuan Audit Eksternal (BPK, BPKP, Itjen, Inspektorat)', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0 },
+  // Area E: SDM dan Koordinasi (15%)
+  { no: 21, area: 'area_e', nama: 'Capaian SKP Pegawai', target: 'Predikat "Baik"', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 100.0 },
+  { no: 22, area: 'area_e', nama: 'Penganggaran Cost Sharing', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0 },
+  { no: 23, area: 'area_e', nama: 'Realisasi Cost Sharing', target: '≥ 95%*', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 101.0 },
+  { no: 24, area: 'area_e', nama: 'Lama Masa Kerja sebagai Kepala P3DW', target: '≥ 24 bulan*', arah: 'naik', bobot: 1, batasAtas: 100, capaian: 116.7 },
+  { no: 25, area: 'area_e', nama: 'Koordinasi dengan Instansi (TPS + BJB, Pemkab/Pemkot)', target: '≥ 12/tahun*', arah: 'naik', bobot: 1, batasAtas: 120, capaian: 100.0 },
+  { no: 26, area: 'area_e', nama: 'Inovasi Layanan', target: '≥ 1/tahun', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0 },
 ];
+
+export interface TrenPenilaianRow {
+  id: string;
+  parent?: string;
+  level: number;
+  komponen: string;
+  bobot: string;
+  target?: string;
+  capaian: string;
+  skor: string;
+  poin: string;
+  isTotal?: boolean;
+  jumlahAnak?: string;
+  bobotNum?: number; // khusus baris KPI
+  batasAtas?: number; // khusus baris KPI
+}
+
+const AREA_GROUPS: { id: AreaKey; sumbu: 'sumbu_y' | 'sumbu_x'; nama: string }[] = [
+  { id: 'area_a', sumbu: 'sumbu_y', nama: 'Area A: Pendapatan' },
+  { id: 'area_b', sumbu: 'sumbu_y', nama: 'Area B: Kepatuhan WP' },
+  { id: 'area_c', sumbu: 'sumbu_x', nama: 'Area C: Pelayanan' },
+  { id: 'area_d', sumbu: 'sumbu_x', nama: 'Area D: Tata Kelola' },
+  { id: 'area_e', sumbu: 'sumbu_x', nama: 'Area E: SDM dan Koordinasi' },
+];
+
+const fmt = (val: number) => (Math.round(val * 10) / 10).toFixed(1).replace('.', ',');
+const fmtBobot = (val: number) => String(Math.round(val * 10) / 10).replace('.', ',');
+
+const kpiSkor = (kpi: KpiDefinition) => Math.min(kpi.batasAtas, kpi.capaian);
+
+// Skor kelompok = Σ(skor KPI × bobot komponen) ÷ Σ bobot komponen
+const summarize = (items: KpiDefinition[]) => {
+  const bobot = items.reduce((acc, k) => acc + k.bobot, 0);
+  const poin = items.reduce((acc, k) => acc + (kpiSkor(k) * k.bobot) / 100, 0);
+  const capaian = items.reduce((acc, k) => acc + k.capaian * k.bobot, 0) / bobot;
+  return { bobot, poin, skor: (poin * 100) / bobot, capaian };
+};
+
+const buildTrenPenilaianData = (): TrenPenilaianRow[] => {
+  const total = summarize(KPI_DEFINITIONS);
+  const rows: TrenPenilaianRow[] = [
+    { id: 'total', level: 0, komponen: 'Skor Akhir (Total 5 Area)', bobot: '100', capaian: fmt(total.skor), skor: fmt(total.skor), poin: fmt(total.poin), isTotal: true },
+  ];
+
+  const sumbuList = [
+    { id: 'sumbu_y' as const, nama: 'Sumbu Y – Kinerja: Kemandirian Keuangan Daerah' },
+    { id: 'sumbu_x' as const, nama: 'Sumbu X – Potensi: Kualitas Pelayanan Publik' },
+  ];
+
+  sumbuList.forEach((sumbu) => {
+    const areas = AREA_GROUPS.filter((a) => a.sumbu === sumbu.id);
+    const sumbuKpis = KPI_DEFINITIONS.filter((k) => areas.some((a) => a.id === k.area));
+    const s = summarize(sumbuKpis);
+    rows.push({
+      id: sumbu.id, level: 1, komponen: sumbu.nama, bobot: fmtBobot(s.bobot),
+      capaian: fmt(s.capaian), skor: fmt(s.skor), poin: fmt(s.poin),
+      jumlahAnak: `${areas.length} Area • ${sumbuKpis.length} KPI`,
+    });
+
+    areas.forEach((area) => {
+      const areaKpis = KPI_DEFINITIONS.filter((k) => k.area === area.id);
+      const a = summarize(areaKpis);
+      rows.push({
+        id: area.id, parent: sumbu.id, level: 2, komponen: area.nama, bobot: fmtBobot(a.bobot),
+        capaian: fmt(a.capaian), skor: fmt(a.skor), poin: fmt(a.poin),
+        jumlahAnak: `${areaKpis.length} Indikator`,
+      });
+
+      areaKpis.forEach((kpi) => {
+        const skor = kpiSkor(kpi);
+        rows.push({
+          id: `kpi_${kpi.no}`, parent: area.id, level: 3,
+          komponen: `${kpi.no}. ${kpi.nama}${kpi.arah === 'turun' ? ' ↓' : ''}`,
+          bobot: fmtBobot(kpi.bobot), target: kpi.target, bobotNum: kpi.bobot, batasAtas: kpi.batasAtas,
+          capaian: fmt(kpi.capaian), skor: fmt(skor), poin: fmt((skor * kpi.bobot) / 100),
+        });
+      });
+    });
+  });
+
+  return rows;
+};
+
+export const mockTrenPenilaianData: TrenPenilaianRow[] = buildTrenPenilaianData();
+export const mockTrenPenilaianTotal: number = summarize(KPI_DEFINITIONS).skor;
 
 export interface NineBoxItem {
   id: string;

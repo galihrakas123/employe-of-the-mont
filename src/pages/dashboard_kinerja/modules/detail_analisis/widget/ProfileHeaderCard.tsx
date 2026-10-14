@@ -17,11 +17,8 @@ export const ProfileHeaderCard: React.FC<ProfileHeaderCardProps> = ({ unitData }
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#F1F5F9]">
         <div>
           <h3 className="text-[16px] font-semibold text-[#212121]">
-            Profil Unit Kerja &amp; Kepala UPTD
+            Profil Unit Kerja &amp; Kepala P3DW
           </h3>
-          <p className="text-[12px] text-[#757575] mt-0.5">
-            Informasi kepegawaian dan data administratif penanggung jawab unit
-          </p>
         </div>
         <span className="text-[11px] font-semibold text-[#00875A] bg-[#E6F4EA] px-3 py-1 rounded-full border border-[#00875A]/20">
           Data Terverifikasi Bapenda

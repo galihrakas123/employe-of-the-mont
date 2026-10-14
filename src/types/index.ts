@@ -26,9 +26,9 @@ export interface NineBoxItem {
   predikat: 'A' | 'B' | 'C' | 'D';
   scoreA: number; // 40% Pendapatan
   scoreB: number; // 20% Kepatuhan
-  scoreC: number; // 20% Pelayanan
+  scoreC: number; // 15% Pelayanan
   scoreD: number; // 10% Tata Kelola
-  scoreE: number; // 10% SDM
+  scoreE: number; // 15% SDM dan Koordinasi
   klaster: 'Hijau' | 'Sedang' | 'Kritis';
   korwil: string;
 }

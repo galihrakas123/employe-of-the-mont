@@ -116,9 +116,9 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               <th style={{ padding: '10px 14px', borderRight: '1px solid #e2e8f0' }}>PREDIKAT</th>
               <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>A (40%)</th>
               <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>B (20%)</th>
-              <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>C (20%)</th>
+              <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>C (15%)</th>
               <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>D (10%)</th>
-              <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>E (10%)</th>
+              <th style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>E (15%)</th>
               <th style={{ padding: '10px 14px', textAlign: 'center' }}>AKSI</th>
             </tr>
           </thead>

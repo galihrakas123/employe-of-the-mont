@@ -1,58 +1,60 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ChevronDown, ChevronRight, ChevronsUpDown } from 'lucide-react';
-import { mockTrenPenilaianData } from '@/services/dashboardMockData';
+import { mockTrenPenilaianData, mockTrenPenilaianTotal } from '@/services/dashboardMockData';
 
 interface TrenPenilaianTableProps {
   totalSkor?: number;
 }
 
-// Parent mapping untuk relasi hierarki baris
-const parentMap: Record<string, string> = {
-  // Level 2 -> Level 1
-  area_1: 'sumbu_y',
-  area_2: 'sumbu_y',
-  area_3: 'sumbu_x',
-  area_4: 'sumbu_x',
-  area_5: 'sumbu_x',
-  // Level 3 -> Level 2
-  kpi_1: 'area_1',
-  kpi_2: 'area_1',
-  kpi_3: 'area_1',
-  kpi_4: 'area_1',
-  kpi_5: 'area_1',
-  kpi_6: 'area_2',
-  kpi_7: 'area_2',
-  kpi_8: 'area_2',
-  kpi_9: 'area_2',
-  kpi_10: 'area_3',
-  kpi_11: 'area_3',
-  kpi_12: 'area_3',
-  kpi_13: 'area_4',
-  kpi_14: 'area_4',
-  kpi_15: 'area_4',
-  kpi_16: 'area_5',
-  kpi_17: 'area_5',
-  kpi_18: 'area_5',
-  kpi_19: 'area_5',
-};
+// Relasi hierarki baris & jumlah sub-indikator diturunkan dari data KPI
+const parentMap: Record<string, string> = Object.fromEntries(
+  mockTrenPenilaianData.filter((row) => row.parent).map((row) => [row.id, row.parent as string])
+);
 
-// Jumlah sub-indikator per kelompok
-const subItemCounts: Record<string, string> = {
-  sumbu_y: '2 Area • 9 KPI',
-  sumbu_x: '3 Area • 10 KPI',
-  area_1: '5 Indikator',
-  area_2: '4 Indikator',
-  area_3: '3 Indikator',
-  area_4: '3 Indikator',
-  area_5: '4 Indikator',
-};
+const subItemCounts: Record<string, string> = Object.fromEntries(
+  mockTrenPenilaianData.filter((row) => row.jumlahAnak).map((row) => [row.id, row.jumlahAnak as string])
+);
+
+const allCollapsibleIds = mockTrenPenilaianData.filter((row) => row.level === 1 || row.level === 2).map((row) => row.id);
+const jumlahKpi = mockTrenPenilaianData.filter((row) => row.level === 3).length;
 
 export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSkor = 95.8 }) => {
   // Scaling factor agar sub-komponen dinamis mengikuti total skor unit aktual
-  const factor = totalSkor ? Math.min(1.15, Math.max(0.45, totalSkor / 87.8)) : 1;
+  const factor = totalSkor ? Math.min(1.15, Math.max(0.45, totalSkor / mockTrenPenilaianTotal)) : 1;
+
+  // Skala capaian tiap KPI, lalu hitung ulang skor (dengan batas atas per KPI), poin, dan agregat area/sumbu
+  const scaledRows = useMemo(() => {
+    const result: Record<string, { capaian: number; skor: number; poin: number }> = {};
+    const agg: Record<string, { bobot: number; capaianW: number; poin: number }> = {};
+
+    mockTrenPenilaianData.forEach((row) => {
+      if (row.level !== 3) return;
+      const bobot = row.bobotNum ?? 0;
+      const capaian = Math.min(120, parseFloat(row.capaian.replace(',', '.')) * factor);
+      const skor = Math.min(row.batasAtas ?? 120, capaian);
+      const poin = (skor * bobot) / 100;
+      result[row.id] = { capaian, skor, poin };
+
+      let parent = row.parent;
+      while (parent) {
+        agg[parent] ??= { bobot: 0, capaianW: 0, poin: 0 };
+        agg[parent].bobot += bobot;
+        agg[parent].capaianW += capaian * bobot;
+        agg[parent].poin += poin;
+        parent = parentMap[parent];
+      }
+    });
+
+    Object.entries(agg).forEach(([id, a]) => {
+      result[id] = { capaian: a.capaianW / a.bobot, skor: (a.poin * 100) / a.bobot, poin: a.poin };
+    });
+
+    return result;
+  }, [factor]);
+
+  const fmt = (val: number) => (Math.round(val * 10) / 10).toFixed(1).replace('.', ',');
 
   // Set default terbuka semua (User dapat toggle collapse/expand per baris)
-  const allCollapsibleIds = ['sumbu_y', 'sumbu_x', 'area_1', 'area_2', 'area_3', 'area_4', 'area_5'];
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set(allCollapsibleIds));
 
   // Toggle satu baris tertentu
@@ -105,10 +107,10 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 mb-4 border-b border-[#F1F5F9] dark:border-[#334155] gap-3">
         <div>
           <h3 className="text-[16px] font-semibold text-[#212121] dark:text-[#F8FAFC]">
-            Rincian Evaluasi 19 KPI (5 Area Talent Box)
+            Rincian Evaluasi {jumlahKpi} KPI (5 Area Talent Box)
           </h3>
           <p className="text-[12px] text-[#757575] dark:text-[#94A3B8] mt-0.5">
-            Rincian evaluasi 19 indikator kinerja (Sumbu Y 55%) &amp; potensi (Sumbu X 45%) dengan fitur hierarki dropdown per row
+            Rincian evaluasi {jumlahKpi} indikator kinerja (Sumbu Y 60%) &amp; potensi (Sumbu X 40%) dengan fitur hierarki dropdown per row
           </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-center flex-wrap">
@@ -190,7 +192,7 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
                 }
 
                 const isHeaderLevel = row.level === 1; // Sumbu Y / X
-                const isSubHeader = row.level === 2;   // Area 1 - 5
+                const isSubHeader = row.level === 2;   // Area A - E
                 const hasChildren = isHeaderLevel || isSubHeader;
                 const isExpanded = expandedKeys.has(row.id);
 
@@ -198,16 +200,13 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
                 const indentClass =
                   row.level === 1 ? 'pl-4' : row.level === 2 ? 'pl-9' : 'pl-14';
 
-                // Hitung capaian dinamis
-                const rawCapaian = parseFloat(row.capaian.replace(',', '.'));
-                const rawSkor = parseFloat(row.skor.replace(',', '.'));
-                const rawPoin = parseFloat(row.poin.replace(',', '.'));
+                // Capaian, skor & poin hasil skala unit aktual
+                const scaled = scaledRows[row.id];
+                const scaledCapaian = fmt(scaled.capaian);
+                const scaledSkor = fmt(scaled.skor);
+                const scaledPoin = fmt(scaled.poin);
 
-                const scaledCapaian = Math.min(120, Math.round(rawCapaian * factor * 10) / 10).toFixed(1).replace('.', ',');
-                const scaledSkor = Math.min(120, Math.round(rawSkor * factor * 10) / 10).toFixed(1).replace('.', ',');
-                const scaledPoin = Math.min(120, Math.round(rawPoin * factor * 10) / 10).toFixed(1).replace('.', ',');
-
-                const capaianNum = parseFloat(scaledCapaian.replace(',', '.'));
+                const capaianNum = scaled.capaian;
 
                 // Badge style capaian
                 let badgeStyle = 'bg-[#FEF3C7] text-[#B45309]';
@@ -301,6 +300,10 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
           </table>
         </div>
       </div>
+      <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8] mt-3 leading-relaxed">
+        ↓ = makin rendah makin baik (skor = target ÷ capaian × 100). Skor dibatasi 120, kecuali KPI No. 18, 19, 20, 22, 23, dan 24 (batas 100).
+        Target bertanda * masih usulan dan perlu ditetapkan.
+      </p>
     </div>
   );
 };
