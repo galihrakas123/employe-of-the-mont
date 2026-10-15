@@ -26,10 +26,10 @@ const SUMBU: Record<SumbuKey, { nama: string; sub: string; mid: number; high: nu
 const AREA_CODE: Record<AreaKey, string> = { area_a: 'A', area_b: 'B', area_c: 'C', area_d: 'D', area_e: 'E' };
 
 // Kolom: komponen | capaian vs target | batang | skor | poin
-const GRID = 'grid grid-cols-[minmax(260px,1fr)_150px_96px_64px_56px] gap-2.5 items-center';
+export const GRID = 'grid grid-cols-[minmax(260px,1fr)_150px_96px_64px_56px] gap-2.5 items-center';
 
-const fmt = (val: number) => (Math.round(val * 10) / 10).toFixed(1).replace('.', ',');
-const fmtBobot = (val: number) => `${String(Math.round(val * 10) / 10).replace('.', ',')}%`;
+export const fmt = (val: number) => (Math.round(val * 10) / 10).toFixed(1).replace('.', ',');
+export const fmtBobot = (val: number) => `${String(Math.round(val * 10) / 10).replace('.', ',')}%`;
 
 // Warna skor terhadap target: ≥ 100 hijau, 90–99,9 kuning, < 90 merah
 const level = (skor: number) => (skor >= 100 ? 'high' : skor >= 90 ? 'mid' : 'low');
@@ -40,21 +40,21 @@ const CHIP: Record<string, string> = {
 };
 const FILL: Record<string, string> = { high: 'bg-[#00875A]', mid: 'bg-[#D97706]', low: 'bg-[#DC2626]' };
 
-const ScoreChip: React.FC<{ skor: number }> = ({ skor }) => (
+export const ScoreChip: React.FC<{ skor: number }> = ({ skor }) => (
   <span className={`inline-block min-w-[48px] text-center px-2 py-1 rounded-md text-[12.5px] font-bold tabular-nums ${CHIP[level(skor)]}`}>
     {fmt(skor)}
   </span>
 );
 
 // Batang skala 0–120 dengan garis target di 100
-const ScoreBar: React.FC<{ skor: number }> = ({ skor }) => (
+export const ScoreBar: React.FC<{ skor: number }> = ({ skor }) => (
   <div className="relative h-2 rounded bg-[#E2E8F0] dark:bg-[#334155]">
     <div className={`h-2 rounded ${FILL[level(skor)]}`} style={{ width: `${(Math.min(120, Math.max(0, skor)) / 120) * 100}%` }} />
     <span className="absolute top-[-3px] h-[14px] w-[2px] bg-[#0F172A] dark:bg-[#F8FAFC] opacity-50" style={{ left: `${(100 / 120) * 100}%` }} />
   </div>
 );
 
-const ToggleButton: React.FC<{ open: boolean; onClick: () => void; label: string; size?: 'md' | 'sm'; tone?: 'light' | 'muted' }> = ({
+export const ToggleButton: React.FC<{ open: boolean; onClick: () => void; label: string; size?: 'md' | 'sm'; tone?: 'light' | 'muted' }> = ({
   open,
   onClick,
   label,

@@ -12,6 +12,7 @@ import MiniNineBoxCard from '../widget/MiniNineBoxCard';
 import NilaiSumbuCard from '../widget/NilaiSumbuCard';
 import TrenAreaChart from '../widget/TrenAreaChart';
 import TrenPenilaianTable from '../widget/TrenPenilaianTable';
+import TrenPenilaianTableV2 from '../widget/TrenPenilaianTableV2';
 import RiwayatBoxCard from '../widget/RiwayatBoxCard';
 
 const periodeOptions = [...PERIODE_LIST].reverse().map((p) => ({ label: p.label, value: p.key }));
@@ -155,6 +156,9 @@ export const DetailAnalisisView: React.FC = () => {
 
             {/* 5. Tabel Rincian Evaluasi & Tren Penilaian (Sejajar lebarnya dengan card di atasnya) */}
             <TrenPenilaianTable totalSkor={evaluasi.total} />
+
+            {/* 6. Tree Penilaian versi 2 (KPI Kepala P3DW, bisa disembunyikan) */}
+            <TrenPenilaianTableV2 />
           </div>
 
           {/* Right Column (1 Col) - Sticky saat scroll */}
