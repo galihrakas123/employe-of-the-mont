@@ -5,12 +5,15 @@ import {
   AreaKey,
   KPI_DEFINITIONS,
   KpiDefinition,
+  KpiHasil,
+  KpiHitung,
   getPredikatBySkor,
+  hitungKpi,
   mockTrenPenilaianTotal,
 } from '@/services/dashboardMockData';
 
 // Tree penilaian: Skor Akhir → 2 sumbu → 5 area → 24 KPI.
-// Panah membuka cabang, tombol i menampilkan rumus dan sumber data.
+// Tombol i menampilkan rumus, sumber data, data mentah yang dipakai, dan rantai hitung nilai → skor → poin.
 
 interface TrenPenilaianTableProps {
   totalSkor?: number;
@@ -78,10 +81,109 @@ export const ToggleButton: React.FC<{ open: boolean; onClick: () => void; label:
 
 interface KpiResult {
   def: KpiDefinition;
-  capaian: number;
+  hasil: KpiHasil;
   skor: number;
   poin: number;
 }
+
+// Angka data mentah: rupiah diringkas (jt/M/T), selain itu pemisah ribuan
+const fmtData = (v: number, data: KpiHitung['data']) => {
+  if (data !== 'Rp') return v.toLocaleString('id-ID');
+  const [div, suf] = v >= 1e12 ? [1e12, 'T'] : v >= 1e9 ? [1e9, 'M'] : v >= 1e6 ? [1e6, 'jt'] : [1, ''];
+  return `Rp ${(v / div).toLocaleString('id-ID', { minimumFractionDigits: div > 1 ? 1 : 0, maximumFractionDigits: 1 })}${suf ? ` ${suf}` : ''}`;
+};
+
+const fmtNilai = (v: number, satuan: KpiHitung['satuan']) => {
+  if (satuan === 'inovasi' || satuan === 'kegiatan') return `${v.toLocaleString('id-ID')} ${satuan}`;
+  if (satuan === 'menit') return `${fmt(v)} menit`;
+  if (satuan === 'indeks') return fmt(v);
+  // Persen kecil (mis. 1,96%) pakai 2 desimal agar selisih ke target tetap terlihat
+  return Math.abs(v) < 10 ? `${v.toFixed(2).replace('.', ',')}%` : `${fmt(v)}%`;
+};
+
+const fmtAngka = (v: number) => String(Math.round(v * 100) / 100).replace('.', ',');
+
+// Rincian hitung di panel info: data yang dipakai, lalu langkah nilai → skor → poin beserta hasilnya
+const RincianHitung: React.FC<{ def: KpiDefinition; hasil: KpiHasil; skor: number; poin: number }> = ({ def, hasil, skor, poin }) => {
+  const h = def.hitung;
+  const dibatasi = hasil.skorMentah > def.batasAtas;
+  const data = (v?: number) => fmtData(v ?? 0, h?.data);
+
+  // Baris data mentah (label kiri, angka kanan)
+  const dataRows: [string, string][] = !h
+    ? []
+    : h.jenis === 'langsung'
+      ? [[h.pembilang, fmtNilai(hasil.nilai, h.satuan)]]
+      : [
+          [h.pembilang, data(hasil.pembilang)],
+          [h.penyebut ?? '', data(hasil.penyebut)],
+        ];
+
+  const nilaiExpr = !h
+    ? 'Indeks capaian (belum ada data mentah)'
+    : h.jenis === 'langsung'
+      ? 'Nilai terukur'
+      : h.jenis === 'pertumbuhan'
+        ? `(${data(hasil.pembilang)} − ${data(hasil.penyebut)}) ÷ ${data(hasil.penyebut)} × 100%`
+        : `${data(hasil.pembilang)} ÷ ${data(hasil.penyebut)} × 100%`;
+  const nilaiTeks = h ? fmtNilai(hasil.nilai, h.satuan) : `${fmt(hasil.nilai)}%`;
+  const target = h ? fmtAngka(h.target) : '100';
+  const nilaiAngka = fmtAngka(hasil.nilai);
+  const skorExpr =
+    def.arah === 'turun' ? `target ${target} ÷ nilai ${nilaiAngka} × 100` : `nilai ${nilaiAngka} ÷ target ${target} × 100`;
+
+  const steps: { label: string; expr: string; hasil: string; note?: string }[] = [
+    { label: 'Nilai', expr: nilaiExpr, hasil: nilaiTeks },
+    {
+      label: 'Skor',
+      expr: dibatasi ? `${skorExpr} = ${fmt(hasil.skorMentah)}` : skorExpr,
+      hasil: fmt(skor),
+      note: dibatasi ? `dibatasi maks. ${def.batasAtas}` : `maks. ${def.batasAtas}`,
+    },
+    { label: 'Poin', expr: `skor ${fmt(skor)} × bobot ${fmtBobot(def.bobot)}`, hasil: fmt(poin) },
+  ];
+
+  return (
+    <div className="mt-1 max-w-[640px] rounded-lg border border-[#E2E8F0] dark:border-[#334155] bg-white dark:bg-[#1E293B] overflow-hidden">
+      {dataRows.length > 0 && (
+        <div className="px-3 py-2 border-b border-[#E2E8F0] dark:border-[#334155]">
+          <div className="text-[10.5px] font-bold tracking-wide text-[#64748B] dark:text-[#94A3B8] mb-1">DATA YANG DIPAKAI</div>
+          {dataRows.map(([label, value]) => (
+            <div key={label} className="flex justify-between gap-4 text-[12.5px]">
+              <span>{label}</span>
+              <b className="tabular-nums text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap">{value}</b>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="px-3 py-2">
+        <div className="text-[10.5px] font-bold tracking-wide text-[#64748B] dark:text-[#94A3B8] mb-1">PERHITUNGAN</div>
+        <div className="grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-1.5 items-center text-[12.5px]">
+          {steps.map((st, i) => (
+            <React.Fragment key={st.label}>
+              <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap">
+                {i + 1}. {st.label}
+              </span>
+              <span className="tabular-nums min-w-0">
+                {st.expr}
+                {st.note && <span className="text-[#94A3B8]"> ({st.note})</span>}
+              </span>
+              <b
+                className={`justify-self-end tabular-nums whitespace-nowrap px-2 py-0.5 rounded-md ${
+                  i === steps.length - 1
+                    ? 'bg-[#00875A] text-white'
+                    : 'bg-[#F1F5F9] text-[#0F172A] dark:bg-[#334155] dark:text-[#F8FAFC]'
+                }`}
+              >
+                = {st.hasil}
+              </b>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface GroupResult {
   bobot: number;
@@ -102,9 +204,8 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
   const kpis = useMemo<KpiResult[]>(
     () =>
       KPI_DEFINITIONS.map((def) => {
-        const capaian = Math.min(120, def.capaian * factor);
-        const skor = Math.min(def.batasAtas, capaian);
-        return { def, capaian, skor, poin: (skor * def.bobot) / 100 };
+        const hasil = hitungKpi(def, def.capaian * factor);
+        return { def, hasil, skor: hasil.skor, poin: (hasil.skor * def.bobot) / 100 };
       }),
     [factor]
   );
@@ -131,7 +232,7 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
           <h3 className="text-[16px] font-semibold text-[#212121] dark:text-[#F8FAFC]">Tree Penilaian {KPI_DEFINITIONS.length} KPI</h3>
           <p className="text-[12px] text-[#757575] dark:text-[#94A3B8] mt-0.5">
             Dari skor akhir ke dua sumbu, lima area, dan {KPI_DEFINITIONS.length} KPI. Panah membuka cabang, tombol{' '}
-            <span className="font-semibold">i</span> menampilkan rumus dan sumber data.
+            <span className="font-semibold">i</span> menampilkan rumus, data yang dipakai, dan perhitungan skornya.
           </p>
         </div>
         <div className="flex gap-2">
@@ -160,7 +261,7 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
           {/* Header kolom */}
           <div className={`${GRID} px-3.5 text-[11px] font-bold tracking-wide text-[#64748B] dark:text-[#94A3B8]`}>
             <span>KOMPONEN</span>
-            <span className="text-right">CAPAIAN / TARGET</span>
+            <span className="text-right">NILAI / TARGET</span>
             <span>VS TARGET</span>
             <span className="text-right">SKOR</span>
             <span className="text-right">POIN</span>
@@ -246,8 +347,9 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
 
                           {areaOpen && (
                             <div className="tkids">
-                              {areaKpis.map(({ def, capaian, skor, poin }) => {
+                              {areaKpis.map(({ def, hasil, skor, poin }) => {
                                 const infoOpen = info.has(def.no);
+                                const h = def.hitung;
                                 return (
                                   <div key={def.no} className="tnode">
                                     <div className={`${GRID} min-h-[46px] pl-1 pr-3.5 rounded-lg hover:bg-[#F8FAFC] dark:hover:bg-white/[0.03]`}>
@@ -274,7 +376,8 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
                                         </button>
                                       </div>
                                       <span className="text-right text-[12.5px] text-[#475569] dark:text-[#94A3B8] tabular-nums">
-                                        <b className="text-[#0F172A] dark:text-[#F8FAFC]">{fmt(capaian)}%</b> / {def.target}
+                                        <b className="text-[#0F172A] dark:text-[#F8FAFC]">{h ? fmtNilai(hasil.nilai, h.satuan) : `${fmt(hasil.nilai)}%`}</b> /{' '}
+                                        {def.target}
                                       </span>
                                       <ScoreBar skor={skor} />
                                       <span className="text-right">
@@ -301,11 +404,9 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
                                         </span>
                                         <span>
                                           <b className="text-[#0F172A] dark:text-[#F8FAFC]">Arah:</b>{' '}
-                                          {def.arah === 'turun'
-                                            ? 'makin rendah makin baik · skor = target ÷ capaian × 100'
-                                            : 'makin tinggi makin baik · skor = capaian ÷ target × 100'}{' '}
-                                          (maks. {def.batasAtas})
+                                          {def.arah === 'turun' ? 'makin rendah makin baik' : 'makin tinggi makin baik'}
                                         </span>
+                                        <RincianHitung def={def} hasil={hasil} skor={skor} poin={poin} />
                                         {def.catatan && <span className="text-[#B45309] dark:text-[#FBBF24]">Catatan: {def.catatan}</span>}
                                         {def.target.includes('*') && (
                                           <span className="text-[#B45309] dark:text-[#FBBF24]">Target masih usulan dan perlu ditetapkan.</span>

@@ -524,40 +524,102 @@ export interface KpiDefinition {
   sumber: string;
   dasar?: string; // dasar penilaian (IKU Kaban, Kepgub Intensifikasi, SOP, dst.)
   catatan?: string; // hal yang masih perlu diputuskan
+  hitung?: KpiHitung; // data mentah untuk KPI yang bisa langsung dihitung
+}
+
+// Cara menghitung nilai KPI dari data mentah:
+// - rasio: pembilang ÷ penyebut × 100%
+// - pertumbuhan: (tahun ini − tahun lalu) ÷ tahun lalu × 100%
+// - langsung: nilai terukur dipakai apa adanya (indeks, menit, jumlah)
+export interface KpiHitung {
+  jenis: 'rasio' | 'pertumbuhan' | 'langsung';
+  target: number; // target numerik dalam satuan nilai
+  satuan: '%' | 'indeks' | 'menit' | 'inovasi' | 'kegiatan';
+  pembilang: string;
+  penyebut?: string;
+  data?: 'Rp' | 'unit' | 'transaksi' | 'review' | 'temuan' | 'tahap' | 'nilai';
+  basis?: number; // penyebut (rasio) atau realisasi tahun lalu (pertumbuhan), contoh Kota Bandung I
+  maks?: number; // nilai tertinggi yang mungkin (mis. 100% untuk penyelesaian temuan)
+}
+
+export interface KpiHasil {
+  nilai: number; // nilai KPI dalam satuan target
+  skor: number; // setelah batas atas
+  skorMentah: number; // sebelum batas atas
+  pembilang?: number;
+  penyebut?: number;
+}
+
+// Pembulatan data mentah sesuai cara tampilnya, agar hitungan di tabel bisa dicek ulang
+const bulatkanData = (v: number, data: KpiHitung['data']) => {
+  if (data !== 'Rp') return Math.round(v);
+  const step = v >= 1e12 ? 1e11 : v >= 1e9 ? 1e8 : v >= 1e6 ? 1e5 : 1e3;
+  return Math.round(v / step) * step;
+};
+
+// Hitung nilai, skor, dan data mentah KPI dari indeks capaian contoh (skor sebelum batas atas).
+// Data mentah dibentuk mundur dari indeks, lalu nilai & skor dihitung ulang dari data yang sudah dibulatkan.
+export function hitungKpi(def: KpiDefinition, indeks: number): KpiHasil {
+  const h = def.hitung;
+  const skorDari = (nilai: number, target: number) => {
+    const mentah = def.arah === 'naik' ? (nilai / target) * 100 : nilai > 0 ? (target / nilai) * 100 : def.batasAtas;
+    return { skorMentah: mentah, skor: Math.max(0, Math.min(def.batasAtas, mentah)) };
+  };
+  if (!h) {
+    return { nilai: indeks, skorMentah: indeks, skor: Math.max(0, Math.min(def.batasAtas, indeks)) };
+  }
+  const tujuan = def.arah === 'naik' ? (h.target * indeks) / 100 : (h.target * 100) / indeks;
+
+  if (h.jenis === 'langsung') {
+    const nilai = h.satuan === 'inovasi' || h.satuan === 'kegiatan' ? Math.max(0, Math.round(tujuan)) : Math.round(tujuan * 10) / 10;
+    return { nilai, ...skorDari(nilai, h.target) };
+  }
+
+  const basis = h.basis ?? 100;
+  if (h.jenis === 'pertumbuhan') {
+    const kini = bulatkanData(basis * (1 + tujuan / 100), h.data);
+    const nilai = ((kini - basis) / basis) * 100;
+    return { nilai, pembilang: kini, penyebut: basis, ...skorDari(nilai, h.target) };
+  }
+
+  let pembilang = bulatkanData((tujuan / 100) * basis, h.data);
+  if (h.maks !== undefined) pembilang = Math.min(pembilang, bulatkanData((h.maks / 100) * basis, h.data));
+  const nilai = (pembilang / basis) * 100;
+  return { nilai, pembilang, penyebut: basis, ...skorDari(nilai, h.target) };
 }
 
 export const KPI_DEFINITIONS: KpiDefinition[] = [
   // SUMBU Y – KINERJA (55%)
   // Area A: Pendapatan (35%)
-  { no: 1, area: 'area_a', nama: 'Capaian Realisasi PKB', target: '100%', arah: 'naik', bobot: 9, batasAtas: 120, capaian: 112.0, rumus: 'Realisasi PKB ÷ target tahun berjalan × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban' },
-  { no: 2, area: 'area_a', nama: 'Pertumbuhan PKB (YoY)', target: '≥ 5%', arah: 'naik', bobot: 9, batasAtas: 120, capaian: 110.0, rumus: '(Realisasi tahun berjalan − realisasi tahun lalu) ÷ realisasi tahun lalu × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban' },
-  { no: 3, area: 'area_a', nama: 'Capaian Realisasi BBNKB', target: '100%', arah: 'naik', bobot: 7, batasAtas: 120, capaian: 108.0, rumus: 'Realisasi BBNKB ÷ target tahun berjalan × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban' },
-  { no: 4, area: 'area_a', nama: 'Capaian Realisasi PAP', target: '100%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 104.0, rumus: 'Realisasi PAP ÷ target tahun berjalan × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban', catatan: 'Belum ditetapkan: bila P3DW tidak punya potensi PAP, bobot 5% dialihkan ke mana.' },
-  { no: 5, area: 'area_a', nama: 'Capaian Realisasi PAB', target: '100%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 101.0, rumus: 'Realisasi PAB ÷ target tahun berjalan × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban' },
+  { no: 1, area: 'area_a', nama: 'Capaian Realisasi PKB', target: '100%', arah: 'naik', bobot: 9, batasAtas: 120, capaian: 112.0, rumus: 'Realisasi PKB ÷ target tahun berjalan × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban', hitung: { jenis: 'rasio', target: 100, satuan: '%', pembilang: 'Realisasi PKB', penyebut: 'Target PKB', data: 'Rp', basis: 368_400_000_000 } },
+  { no: 2, area: 'area_a', nama: 'Pertumbuhan PKB (YoY)', target: '≥ 5%', arah: 'naik', bobot: 9, batasAtas: 120, capaian: 110.0, rumus: '(Realisasi tahun berjalan − realisasi tahun lalu) ÷ realisasi tahun lalu × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban', hitung: { jenis: 'pertumbuhan', target: 5, satuan: '%', pembilang: 'Realisasi PKB 2026', penyebut: 'Realisasi PKB 2025', data: 'Rp', basis: 351_000_000_000 } },
+  { no: 3, area: 'area_a', nama: 'Capaian Realisasi BBNKB', target: '100%', arah: 'naik', bobot: 7, batasAtas: 120, capaian: 108.0, rumus: 'Realisasi BBNKB ÷ target tahun berjalan × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban', hitung: { jenis: 'rasio', target: 100, satuan: '%', pembilang: 'Realisasi BBNKB', penyebut: 'Target BBNKB', data: 'Rp', basis: 142_500_000_000 } },
+  { no: 4, area: 'area_a', nama: 'Capaian Realisasi PAP', target: '100%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 104.0, rumus: 'Realisasi PAP ÷ target tahun berjalan × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban', catatan: 'Belum ditetapkan: bila P3DW tidak punya potensi PAP, bobot 5% dialihkan ke mana.', hitung: { jenis: 'rasio', target: 100, satuan: '%', pembilang: 'Realisasi PAP', penyebut: 'Target PAP', data: 'Rp', basis: 2_400_000_000 } },
+  { no: 5, area: 'area_a', nama: 'Capaian Realisasi PAB', target: '100%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 101.0, rumus: 'Realisasi PAB ÷ target tahun berjalan × 100%', sumber: 'Sistem Samsat / e-Samsat', dasar: 'IKU Kaban', hitung: { jenis: 'rasio', target: 100, satuan: '%', pembilang: 'Realisasi PAB', penyebut: 'Target PAB', data: 'Rp', basis: 1_800_000_000 } },
   // Area B: Kepatuhan WP (20%)
-  { no: 6, area: 'area_b', nama: 'Rasio Kepatuhan Daftar Ulang', target: '≥ 75%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 101.5, rumus: 'Ranmor yang bayar daftar ulang tepat waktu ÷ ranmor terdaftar (potensi) × 100%', sumber: 'Database ranmor', dasar: 'Kepgub Intensifikasi' },
-  { no: 7, area: 'area_b', nama: 'Efektivitas Penelusuran Atos Pamor', target: '≥ 40%*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 105.0, rumus: 'KBM yang membayar ÷ KBM yang telah ditelusuri × 100%', sumber: 'Data Atos Pamor', dasar: 'Kepgub Intensifikasi' },
-  { no: 8, area: 'area_b', nama: 'Efektivitas Penelusuran Panah Pasopati', target: '≥ 40%*', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 102.0, rumus: 'KBM yang membayar ÷ KBM yang telah ditelusuri × 100%', sumber: 'Data Panah Pasopati', dasar: 'Kepgub Intensifikasi' },
-  { no: 9, area: 'area_b', nama: 'Pengendalian KBMDU', target: '≤ 2%/bln*', arah: 'turun', bobot: 6, batasAtas: 120, capaian: 103.0, rumus: 'Laju pertumbuhan KBMDU per bulan ÷ potensi taat tahun sebelumnya × 100%', sumber: 'Database ranmor', dasar: 'Kepgub Intensifikasi' },
-  { no: 10, area: 'area_b', nama: 'Realisasi Opsgab + Opsus', target: '100%*', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 99.0, rumus: 'KBM yang terjaring saat Opsgab dan Opsus ÷ total KBMDU + KTMDU × 100%', sumber: 'Bidang PP', dasar: 'Kepgub Intensifikasi' },
-  { no: 11, area: 'area_b', nama: 'Kepatuhan Pajak WP ASN', target: '≥ 90%*', arah: 'naik', bobot: 1, batasAtas: 120, capaian: 96.0, rumus: 'KBM WP ASN yang patuh ÷ potensi KBM WP ASN × 100%', sumber: 'Zonita Pamor Kab/Kota', dasar: 'Kepgub Intensifikasi' },
+  { no: 6, area: 'area_b', nama: 'Rasio Kepatuhan Daftar Ulang', target: '≥ 75%', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 101.5, rumus: 'Ranmor yang bayar daftar ulang tepat waktu ÷ ranmor terdaftar (potensi) × 100%', sumber: 'Database ranmor', dasar: 'Kepgub Intensifikasi', hitung: { jenis: 'rasio', target: 75, satuan: '%', pembilang: 'Ranmor bayar tepat waktu', penyebut: 'Ranmor terdaftar', data: 'unit', basis: 412_350 } },
+  { no: 7, area: 'area_b', nama: 'Efektivitas Penelusuran Atos Pamor', target: '≥ 40%*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 105.0, rumus: 'KBM yang membayar ÷ KBM yang telah ditelusuri × 100%', sumber: 'Data Atos Pamor', dasar: 'Kepgub Intensifikasi', hitung: { jenis: 'rasio', target: 40, satuan: '%', pembilang: 'KBM membayar', penyebut: 'KBM ditelusuri', data: 'unit', basis: 3_200 } },
+  { no: 8, area: 'area_b', nama: 'Efektivitas Penelusuran Panah Pasopati', target: '≥ 40%*', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 102.0, rumus: 'KBM yang membayar ÷ KBM yang telah ditelusuri × 100%', sumber: 'Data Panah Pasopati', dasar: 'Kepgub Intensifikasi', hitung: { jenis: 'rasio', target: 40, satuan: '%', pembilang: 'KBM membayar', penyebut: 'KBM ditelusuri', data: 'unit', basis: 2_450 } },
+  { no: 9, area: 'area_b', nama: 'Pengendalian KBMDU', target: '≤ 2%/bln*', arah: 'turun', bobot: 6, batasAtas: 120, capaian: 103.0, rumus: 'Laju pertumbuhan KBMDU per bulan ÷ potensi taat tahun sebelumnya × 100%', sumber: 'Database ranmor', dasar: 'Kepgub Intensifikasi', hitung: { jenis: 'rasio', target: 2, satuan: '%', pembilang: 'Pertambahan KBMDU bulan ini', penyebut: 'Potensi taat 2025', data: 'unit', basis: 380_000 } },
+  { no: 10, area: 'area_b', nama: 'Realisasi Opsgab + Opsus', target: '≥ 5%*', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 99.0, rumus: 'KBM yang terjaring saat Opsgab dan Opsus ÷ total KBMDU + KTMDU × 100%', sumber: 'Bidang PP', dasar: 'Kepgub Intensifikasi', hitung: { jenis: 'rasio', target: 5, satuan: '%', pembilang: 'KBM terjaring Opsgab + Opsus', penyebut: 'KBMDU + KTMDU', data: 'unit', basis: 48_600 } },
+  { no: 11, area: 'area_b', nama: 'Kepatuhan Pajak WP ASN', target: '≥ 90%*', arah: 'naik', bobot: 1, batasAtas: 120, capaian: 96.0, rumus: 'KBM WP ASN yang patuh ÷ potensi KBM WP ASN × 100%', sumber: 'Zonita Pamor Kab/Kota', dasar: 'Kepgub Intensifikasi', hitung: { jenis: 'rasio', target: 90, satuan: '%', pembilang: 'KBM WP ASN patuh', penyebut: 'Potensi KBM WP ASN', data: 'unit', basis: 18_400 } },
 
   // SUMBU X – POTENSI (45%)
   // Area C: Pelayanan (20%)
-  { no: 12, area: 'area_c', nama: 'Indeks Kepuasan Masyarakat (IKM)', target: '≥ 82', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 106.0, rumus: 'Nilai IKM semester terakhir (survei sesuai PermenPANRB 14/2017)', sumber: 'Survei semesteran', dasar: 'IKU Kaban' },
-  { no: 13, area: 'area_c', nama: 'Waktu Layanan Daftar Ulang', target: '≤ 20 menit*', arah: 'turun', bobot: 5, batasAtas: 120, capaian: 110.0, rumus: 'Rata-rata rentang waktu jam daftar s.d. jam bayar', sumber: 'PSIP', dasar: 'SOP / Standar Layanan' },
-  { no: 14, area: 'area_c', nama: 'Penyelesaian Pengaduan Tepat Waktu', target: '1×24 jam', arah: 'naik', bobot: 4, batasAtas: 120, capaian: 100.0, rumus: 'Nilai per pengaduan: selesai ≤ 1×24 jam = 3, ≤ 2×24 jam = 2, > 2×24 jam = 1; direlatifkan terhadap potensi P3DW', sumber: 'Drupadi', dasar: 'SOP / Standar Layanan' },
-  { no: 15, area: 'area_c', nama: 'Adopsi Kanal Digital', target: '≥ 30%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 104.5, rumus: 'Jumlah transaksi digital (Signal, Sambara, Kiosk, Salira, Sanggem, Samsat Digital Lw. Panjang) ÷ total transaksi × 100%', sumber: 'Sistem' },
-  { no: 16, area: 'area_c', nama: 'Review Masyarakat (Drupadi)', target: '≤ 10%*', arah: 'turun', bobot: 3, batasAtas: 120, capaian: 97.8, rumus: 'Jumlah review negatif ÷ total review × 100%', sumber: 'Drupadi', dasar: 'SOP / Standar Layanan', catatan: 'Kepala P3DW dapat mengajukan banding atas review.' },
+  { no: 12, area: 'area_c', nama: 'Indeks Kepuasan Masyarakat (IKM)', target: '≥ 82', arah: 'naik', bobot: 5, batasAtas: 120, capaian: 106.0, rumus: 'Nilai IKM semester terakhir (survei sesuai PermenPANRB 14/2017)', sumber: 'Survei semesteran', dasar: 'IKU Kaban', hitung: { jenis: 'langsung', target: 82, satuan: 'indeks', pembilang: 'Nilai IKM semester I 2026' } },
+  { no: 13, area: 'area_c', nama: 'Waktu Layanan Daftar Ulang', target: '≤ 20 menit*', arah: 'turun', bobot: 5, batasAtas: 120, capaian: 110.0, rumus: 'Rata-rata rentang waktu jam daftar s.d. jam bayar', sumber: 'PSIP', dasar: 'SOP / Standar Layanan', hitung: { jenis: 'langsung', target: 20, satuan: 'menit', pembilang: 'Rata-rata jam daftar s.d. jam bayar' } },
+  { no: 14, area: 'area_c', nama: 'Penyelesaian Pengaduan Tepat Waktu', target: '100%', arah: 'naik', bobot: 4, batasAtas: 120, capaian: 100.0, rumus: 'Total nilai pengaduan ÷ (jumlah pengaduan × 3) × 100%; nilai per pengaduan: selesai ≤ 1×24 jam = 3, ≤ 2×24 jam = 2, > 2×24 jam = 1; direlatifkan terhadap potensi P3DW', sumber: 'Drupadi', dasar: 'SOP / Standar Layanan', hitung: { jenis: 'rasio', target: 100, satuan: '%', pembilang: 'Total nilai pengaduan', penyebut: 'Nilai maksimal (jumlah pengaduan × 3)', data: 'nilai', basis: 360, maks: 100 } },
+  { no: 15, area: 'area_c', nama: 'Adopsi Kanal Digital', target: '≥ 30%', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 104.5, rumus: 'Jumlah transaksi digital (Signal, Sambara, Kiosk, Salira, Sanggem, Samsat Digital Lw. Panjang) ÷ total transaksi × 100%', sumber: 'Sistem', hitung: { jenis: 'rasio', target: 30, satuan: '%', pembilang: 'Transaksi digital', penyebut: 'Total transaksi', data: 'transaksi', basis: 96_500 } },
+  { no: 16, area: 'area_c', nama: 'Review Masyarakat (Drupadi)', target: '≤ 10%*', arah: 'turun', bobot: 3, batasAtas: 120, capaian: 97.8, rumus: 'Jumlah review negatif ÷ total review × 100%', sumber: 'Drupadi', dasar: 'SOP / Standar Layanan', catatan: 'Kepala P3DW dapat mengajukan banding atas review.', hitung: { jenis: 'rasio', target: 10, satuan: '%', pembilang: 'Review negatif', penyebut: 'Total review', data: 'review', basis: 640 } },
   // Area D: Tata Kelola (10%)
-  { no: 17, area: 'area_d', nama: 'Ketepatan Penganggaran Belanja (Deviasi)', target: '≥ 95%*', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 103.2, rumus: 'Realisasi belanja ÷ target anggaran kas × 100% (skor berbasis deviasi)', sumber: 'LPJ Keuangan', dasar: 'Permendagri' },
-  { no: 18, area: 'area_d', nama: 'TL Temuan Internal Tepat Waktu', target: '100%', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 100.0, rumus: 'Temuan Dalev yang sudah ditindaklanjuti ÷ total temuan × 100%', sumber: 'LHP', dasar: 'SPIP' },
-  { no: 19, area: 'area_d', nama: 'TL Temuan Eksternal Tepat Waktu', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0, rumus: 'Temuan BPK, BPKP, Itjen, dan Inspektorat yang sudah ditindaklanjuti ÷ total temuan × 100%', sumber: 'LHP', dasar: 'SPIP' },
+  { no: 17, area: 'area_d', nama: 'Ketepatan Penganggaran Belanja (Deviasi)', target: '≥ 95%*', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 103.2, rumus: 'Realisasi belanja ÷ target anggaran kas × 100% (skor berbasis deviasi)', sumber: 'LPJ Keuangan', dasar: 'Permendagri', hitung: { jenis: 'rasio', target: 95, satuan: '%', pembilang: 'Realisasi belanja', penyebut: 'Anggaran kas kumulatif', data: 'Rp', basis: 6_850_000_000 } },
+  { no: 18, area: 'area_d', nama: 'TL Temuan Internal Tepat Waktu', target: '100%', arah: 'naik', bobot: 3, batasAtas: 100, capaian: 100.0, rumus: 'Temuan Dalev yang sudah ditindaklanjuti ÷ total temuan × 100%', sumber: 'LHP', dasar: 'SPIP', hitung: { jenis: 'rasio', target: 100, satuan: '%', pembilang: 'Temuan ditindaklanjuti', penyebut: 'Total temuan', data: 'temuan', basis: 12, maks: 100 } },
+  { no: 19, area: 'area_d', nama: 'TL Temuan Eksternal Tepat Waktu', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0, rumus: 'Temuan BPK, BPKP, Itjen, dan Inspektorat yang sudah ditindaklanjuti ÷ total temuan × 100%', sumber: 'LHP', dasar: 'SPIP', hitung: { jenis: 'rasio', target: 100, satuan: '%', pembilang: 'Temuan ditindaklanjuti', penyebut: 'Total temuan', data: 'temuan', basis: 9, maks: 100 } },
   // Area E: SDM dan Koordinasi (15%)
-  { no: 20, area: 'area_e', nama: 'Penganggaran Cost Sharing', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0, rumus: 'Kesesuaian anggaran cost sharing dengan SE Gubernur (Murni dan Perubahan)', sumber: 'Dokumen anggaran Kab/Kota', dasar: 'SE Gubernur' },
-  { no: 21, area: 'area_e', nama: 'Realisasi Cost Sharing', target: '≥ 95%*', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 101.0, rumus: 'Realisasi cost sharing Kab/Kota ÷ anggaran cost sharing × 100%', sumber: 'Realisasi cost sharing Kab/Kota', dasar: 'SE Gubernur' },
-  { no: 22, area: 'area_e', nama: 'Inovasi (Rubrik Kualitas)', target: '≥ 1/tahun', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0, rumus: 'Inovasi layanan yang diterapkan, dinilai dengan rubrik kualitas (EOTM)', sumber: 'Laporan inovasi', dasar: 'Merit sistem' },
-  { no: 23, area: 'area_e', nama: 'Koordinasi (Rubrik BARS)', target: '≥ 12/tahun*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 100.0, rumus: 'Jumlah kegiatan koordinasi dengan instansi (TPS + BJB, Pemkab/Pemkot), dinilai dengan rubrik BARS', sumber: 'Notulen', dasar: 'TPS' },
+  { no: 20, area: 'area_e', nama: 'Penganggaran Cost Sharing', target: '100%', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 100.0, rumus: 'Kesesuaian anggaran cost sharing dengan SE Gubernur (Murni dan Perubahan)', sumber: 'Dokumen anggaran Kab/Kota', dasar: 'SE Gubernur', hitung: { jenis: 'rasio', target: 100, satuan: '%', pembilang: 'Tahap sesuai SE', penyebut: 'Tahap berjalan', data: 'tahap', basis: 2, maks: 100 } },
+  { no: 21, area: 'area_e', nama: 'Realisasi Cost Sharing', target: '≥ 95%*', arah: 'naik', bobot: 4, batasAtas: 100, capaian: 101.0, rumus: 'Realisasi cost sharing Kab/Kota ÷ anggaran cost sharing × 100%', sumber: 'Realisasi cost sharing Kab/Kota', dasar: 'SE Gubernur', hitung: { jenis: 'rasio', target: 95, satuan: '%', pembilang: 'Realisasi cost sharing', penyebut: 'Anggaran cost sharing', data: 'Rp', basis: 4_200_000_000 } },
+  { no: 22, area: 'area_e', nama: 'Inovasi (Rubrik Kualitas)', target: '≥ 1/tahun', arah: 'naik', bobot: 3, batasAtas: 120, capaian: 100.0, rumus: 'Inovasi layanan yang diterapkan, dinilai dengan rubrik kualitas (EOTM)', sumber: 'Laporan inovasi', dasar: 'Merit sistem', hitung: { jenis: 'langsung', target: 1, satuan: 'inovasi', pembilang: 'Inovasi diterapkan tahun ini' } },
+  { no: 23, area: 'area_e', nama: 'Koordinasi (Rubrik BARS)', target: '≥ 12/tahun*', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 100.0, rumus: 'Jumlah kegiatan koordinasi dengan instansi (TPS + BJB, Pemkab/Pemkot), dinilai dengan rubrik BARS', sumber: 'Notulen', dasar: 'TPS', hitung: { jenis: 'langsung', target: 12, satuan: 'kegiatan', pembilang: 'Kegiatan koordinasi tahun ini' } },
   { no: 24, area: 'area_e', nama: 'Capaian SKP Pegawai', target: 'Predikat "Baik"', arah: 'naik', bobot: 2, batasAtas: 120, capaian: 100.0, rumus: 'Rata-rata nilai SKP seluruh pegawai P3D', sumber: 'Kepegawaian', dasar: 'Merit sistem' },
 ];
 

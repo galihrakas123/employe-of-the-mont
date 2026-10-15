@@ -48,7 +48,7 @@ Keterangan arah: ↑ = makin tinggi makin baik, ↓ = makin rendah makin baik. T
 | 7 | Kepatuhan WP | Efektivitas penelusuran Atos Pamor | KBM yang membayar ÷ KBM yang telah ditelusuri × 100% | ↑ | ≥ 40%\* | 2% | 3,6% | Data Atos Pamor | Kepgub Intensifikasi |
 | 8 | Kepatuhan WP | Efektivitas penelusuran Panah Pasopati | KBM yang membayar ÷ KBM yang telah ditelusuri × 100% | ↑ | ≥ 40%\* | 3% | 5,5% | Data Panah Pasopati | Kepgub Intensifikasi |
 | 9 | Kepatuhan WP | Pengendalian KBMDU | Laju pertumbuhan KBMDU per bulan ÷ potensi taat tahun sebelumnya × 100% | ↓ | ≤ 2%/bulan\* | 6% | 10,9% | Database ranmor | Kepgub Intensifikasi |
-| 10 | Kepatuhan WP | Realisasi Opsgab + Opsus | KBM yang terjaring saat Opsgab dan Opsus ÷ total KBMDU + KTMDU × 100% | ↑ | 100%\* | 3% | 5,5% | Bidang PP | Kepgub Intensifikasi |
+| 10 | Kepatuhan WP | Realisasi Opsgab + Opsus | KBM yang terjaring saat Opsgab dan Opsus ÷ total KBMDU + KTMDU × 100% | ↑ | ≥ 5%\* | 3% | 5,5% | Bidang PP | Kepgub Intensifikasi |
 | 11 | Kepatuhan WP | Kepatuhan pajak WP ASN | KBM WP ASN yang patuh ÷ potensi KBM WP ASN × 100% | ↑ | ≥ 90%\* | 1% | 1,8% | Zonita Pamor Kab/Kota | Kepgub Intensifikasi |
 | | | | | | **Total** | **55%** | **100%** | | |
 
@@ -58,7 +58,7 @@ Keterangan arah: ↑ = makin tinggi makin baik, ↓ = makin rendah makin baik. T
 |---|---|---|---|---|---|---|---|---|---|
 | 12 | Pelayanan | Indeks Kepuasan Masyarakat (IKM) | Nilai IKM semester terakhir (survei sesuai PermenPANRB 14/2017) | ↑ | ≥ 82 (kategori Baik) | 5% | 11,1% | Survei semesteran | IKU Kaban |
 | 13 | Pelayanan | Waktu layanan daftar ulang | Rata-rata rentang waktu "jam daftar" s.d. "jam bayar" | ↓ | ≤ 20 menit\* | 5% | 11,1% | PSIP | SOP / Standar Layanan |
-| 14 | Pelayanan | Penyelesaian pengaduan tepat waktu | Nilai per pengaduan: selesai ≤ 1×24 jam = 3, ≤ 2×24 jam = 2, > 2×24 jam = 1; direlatifkan terhadap potensi P3DW | ↑ | 1×24 jam | 4% | 8,9% | Drupadi | SOP / Standar Layanan |
+| 14 | Pelayanan | Penyelesaian pengaduan tepat waktu | Total nilai pengaduan ÷ (jumlah pengaduan × 3) × 100%; nilai per pengaduan: selesai ≤ 1×24 jam = 3, ≤ 2×24 jam = 2, > 2×24 jam = 1; direlatifkan terhadap potensi P3DW | ↑ | 100% | 4% | 8,9% | Drupadi | SOP / Standar Layanan |
 | 15 | Pelayanan | Adopsi kanal digital | Transaksi digital (Signal, Sambara, Kiosk, Salira, Sanggem, Samsat Digital Lw. Panjang) ÷ total transaksi × 100% | ↑ | ≥ 30% | 3% | 6,7% | Sistem | – |
 | 16 | Pelayanan | Review masyarakat (Drupadi) | Jumlah review negatif ÷ total review × 100%; Kapus dapat mengajukan banding | ↓ | ≤ 10%\* | 3% | 6,7% | Drupadi | SOP / Standar Layanan |
 | 17 | Tata kelola | Ketepatan penganggaran belanja (deviasi) | Realisasi belanja ÷ anggaran kas × 100% (skor maks. 100), lihat 2.3 | ↑ | ≥ 95%\* | 3% | 6,7% | LPJ Keuangan | Permendagri |
