@@ -9,7 +9,7 @@ import {
   mockTrenPenilaianTotal,
 } from '@/services/dashboardMockData';
 
-// Tree penilaian: Skor Akhir → 2 sumbu → 5 area → 26 KPI.
+// Tree penilaian: Skor Akhir → 2 sumbu → 5 area → 24 KPI.
 // Panah membuka cabang, tombol i menampilkan rumus dan sumber data.
 
 interface TrenPenilaianTableProps {
@@ -292,6 +292,12 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
                                         </span>
                                         <span>
                                           <b className="text-[#0F172A] dark:text-[#F8FAFC]">Sumber data:</b> {def.sumber}
+                                          {def.dasar && (
+                                            <>
+                                              {' · '}
+                                              <b className="text-[#0F172A] dark:text-[#F8FAFC]">Dasar:</b> {def.dasar}
+                                            </>
+                                          )}
                                         </span>
                                         <span>
                                           <b className="text-[#0F172A] dark:text-[#F8FAFC]">Arah:</b>{' '}
@@ -300,6 +306,7 @@ export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSko
                                             : 'makin tinggi makin baik · skor = capaian ÷ target × 100'}{' '}
                                           (maks. {def.batasAtas})
                                         </span>
+                                        {def.catatan && <span className="text-[#B45309] dark:text-[#FBBF24]">Catatan: {def.catatan}</span>}
                                         {def.target.includes('*') && (
                                           <span className="text-[#B45309] dark:text-[#FBBF24]">Target masih usulan dan perlu ditetapkan.</span>
                                         )}

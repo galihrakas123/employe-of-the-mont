@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ArrowLeft, Building2, Award, History } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { PERIODE_BERJALAN, PERIODE_LIST } from '@/services/periodeData';
@@ -18,8 +18,19 @@ import RiwayatBoxCard from '../widget/RiwayatBoxCard';
 const periodeOptions = [...PERIODE_LIST].reverse().map((p) => ({ label: p.label, value: p.key }));
 
 export const DetailAnalisisView: React.FC = () => {
-  const { handleBack, unitData, scatterData, getKategoriBadgeStyle, periode, isPeriodeBerjalan, evaluasi, setPeriode } =
+  const { handleBack, unitData, scatterData, getKategoriBadgeStyle, periode, isPeriodeBerjalan, evaluasi, setPeriode, showTreeV2 } =
     useDetailAnalisisController();
+
+  // Saat Tree Versi 2 dimunculkan, gulir halus ke posisinya
+  const treeV2Ref = useRef<HTMLDivElement>(null);
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    if (showTreeV2) treeV2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [showTreeV2]);
 
   return (
     <div className="font-roboto pb-12 antialiased">
@@ -157,8 +168,12 @@ export const DetailAnalisisView: React.FC = () => {
             {/* 5. Tabel Rincian Evaluasi & Tren Penilaian (Sejajar lebarnya dengan card di atasnya) */}
             <TrenPenilaianTable totalSkor={evaluasi.total} />
 
-            {/* 6. Tree Penilaian versi 2 (KPI Kepala P3DW, bisa disembunyikan) */}
-            <TrenPenilaianTableV2 />
+            {/* 6. Tree Penilaian versi 2 (KPI Kepala P3DW): tersembunyi, tampil lewat ketik "v2" atau ?v2=1 */}
+            {showTreeV2 && (
+              <div ref={treeV2Ref} className="reveal-in scroll-mt-40">
+                <TrenPenilaianTableV2 />
+              </div>
+            )}
           </div>
 
           {/* Right Column (1 Col) - Sticky saat scroll */}

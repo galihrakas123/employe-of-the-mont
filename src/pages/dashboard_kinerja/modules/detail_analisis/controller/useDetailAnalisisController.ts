@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   mockLeaderboardData,
@@ -6,6 +7,8 @@ import {
   P3dwScatterData,
 } from '@/services/dashboardMockData';
 import { PERIODE_BERJALAN, getEvaluasi, getPeriode } from '@/services/periodeData';
+
+const TREE_V2_KEY = 'detail-analisis:tree-v2';
 
 export const useDetailAnalisisController = () => {
   const navigate = useNavigate();
@@ -34,6 +37,56 @@ export const useDetailAnalisisController = () => {
     else next.set('periode', key);
     setSearchParams(next, { replace: true });
   };
+
+  // Tree Penilaian Versi 2 disembunyikan; tampil lewat ketik "v2" di halaman atau URL ?v2=1 (?v2=0 menyembunyikan).
+  // Pilihan diingat per browser sampai disembunyikan lagi.
+  const [showTreeV2, setShowTreeV2] = useState<boolean>(() => {
+    const param = searchParams.get('v2');
+    if (param === '1' || param === '0') return param === '1';
+    try {
+      return localStorage.getItem(TREE_V2_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (showTreeV2) localStorage.setItem(TREE_V2_KEY, '1');
+      else localStorage.removeItem(TREE_V2_KEY);
+    } catch {
+      // penyimpanan browser tidak tersedia; pilihan hanya berlaku di sesi ini
+    }
+  }, [showTreeV2]);
+
+  // Bersihkan ?v2 dari URL setelah dibaca agar link tetap rapi
+  useEffect(() => {
+    if (!searchParams.has('v2')) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('v2');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  // Ketik "v2" (di luar kolom isian) untuk menampilkan/menyembunyikan
+  useEffect(() => {
+    let last = '';
+    let lastAt = 0;
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target;
+      const isTyping = el instanceof HTMLElement && el.closest('input, textarea, select, [contenteditable="true"]');
+      if (e.ctrlKey || e.metaKey || e.altKey || isTyping) return;
+      const now = Date.now();
+      if (last === 'v' && e.key === '2' && now - lastAt < 800) {
+        setShowTreeV2((v) => !v);
+        last = '';
+        return;
+      }
+      last = e.key.toLowerCase();
+      lastAt = now;
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const handleBack = () => {
     navigate('/beranda');
@@ -65,6 +118,7 @@ export const useDetailAnalisisController = () => {
     isPeriodeBerjalan,
     evaluasi,
     setPeriode,
+    showTreeV2,
   };
 };
 

@@ -199,7 +199,7 @@ export const BerandaDashboardPage: React.FC = () => {
 
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/90">
             <TrendingUp size={14} />
-            <span>0,60 Kinerja (Y) + 0,40 Potensi (X)</span>
+            <span>0,55 Kinerja (Y) + 0,45 Potensi (X)</span>
           </div>
         </div>
 
@@ -479,13 +479,13 @@ export const BerandaDashboardPage: React.FC = () => {
                     PREDIKAT
                   </th>
                   <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
-                    A (40%)
+                    A (35%)
                   </th>
                   <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
                     B (20%)
                   </th>
                   <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
-                    C (15%)
+                    C (20%)
                   </th>
                   <th className="py-3.5 px-3 text-center border-r border-white/20 whitespace-nowrap">
                     D (10%)

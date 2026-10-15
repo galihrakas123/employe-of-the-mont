@@ -52,7 +52,7 @@ export const NilaiSumbuCard: React.FC<NilaiSumbuCardProps> = ({
         </p>
       </div>
 
-      {/* Sumbu Y: KINERJA (60%) */}
+      {/* Sumbu Y: KINERJA (55%) */}
       <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] mb-4">
         <div className="flex justify-between items-center mb-2">
           <div>
@@ -66,7 +66,7 @@ export const NilaiSumbuCard: React.FC<NilaiSumbuCardProps> = ({
               KINERJA (REALISASI & POTENSI PAJAK)
             </span>
             <span className="text-[11px] text-[#64748B] block mt-0.5 font-normal">
-              Bobot Sumbu 60% · Threshold: Tinggi ≥100, Sedang 90–99.9, Rendah &lt;90
+              Bobot Sumbu 55% · Threshold: Tinggi ≥100, Sedang 90–99.9, Rendah &lt;90
             </span>
           </div>
           <span
@@ -91,17 +91,17 @@ export const NilaiSumbuCard: React.FC<NilaiSumbuCardProps> = ({
         {/* Sub-Indikator Sumbu Y (Area A & Area B) */}
         <div className="flex flex-col gap-1.5 text-[11px] text-[#475569] pt-2 border-t border-[#E2E8F0]/60">
           <div className="flex justify-between items-center">
-            <span>Area A: Pendapatan (Bobot 40% · 4 KPI)</span>
+            <span>Area A: Pendapatan (Bobot 35% · 5 KPI)</span>
             <strong className="text-[#0F172A] font-semibold">{formatScore(valPendapatan)}</strong>
           </div>
           <div className="flex justify-between items-center">
-            <span>Area B: Kepatuhan WP (Bobot 20% · 8 KPI)</span>
+            <span>Area B: Kepatuhan WP (Bobot 20% · 6 KPI)</span>
             <strong className="text-[#0F172A] font-semibold">{formatScore(valKepatuhan)}</strong>
           </div>
         </div>
       </div>
 
-      {/* Sumbu X: POTENSI (40%) */}
+      {/* Sumbu X: POTENSI (45%) */}
       <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
         <div className="flex justify-between items-center mb-2">
           <div>
@@ -115,7 +115,7 @@ export const NilaiSumbuCard: React.FC<NilaiSumbuCardProps> = ({
               POTENSI (LAYANAN & KEPUASAN MASYARAKAT)
             </span>
             <span className="text-[11px] text-[#64748B] block mt-0.5 font-normal">
-              Bobot Sumbu 40% · Threshold: Tinggi ≥95, Sedang 85–94.9, Rendah &lt;85
+              Bobot Sumbu 45% · Threshold: Tinggi ≥95, Sedang 85–94.9, Rendah &lt;85
             </span>
           </div>
           <span
@@ -140,7 +140,7 @@ export const NilaiSumbuCard: React.FC<NilaiSumbuCardProps> = ({
         {/* Sub-Indikator Sumbu X (Area C, D, E) */}
         <div className="flex flex-col gap-1.5 text-[11px] text-[#475569] pt-2 border-t border-[#E2E8F0]/60">
           <div className="flex justify-between items-center">
-            <span>Area C: Pelayanan (Bobot 15% · 5 KPI)</span>
+            <span>Area C: Pelayanan (Bobot 20% · 5 KPI)</span>
             <strong className="text-[#0F172A] font-semibold">{formatScore(valPelayanan)}</strong>
           </div>
           <div className="flex justify-between items-center">
@@ -148,7 +148,7 @@ export const NilaiSumbuCard: React.FC<NilaiSumbuCardProps> = ({
             <strong className="text-[#0F172A] font-semibold">{formatScore(valTataKelola)}</strong>
           </div>
           <div className="flex justify-between items-center">
-            <span>Area E: SDM dan Koordinasi (Bobot 15% · 6 KPI)</span>
+            <span>Area E: SDM dan Koordinasi (Bobot 15% · 5 KPI)</span>
             <strong className="text-[#0F172A] font-semibold">{formatScore(valSdm)}</strong>
           </div>
         </div>
@@ -156,7 +156,7 @@ export const NilaiSumbuCard: React.FC<NilaiSumbuCardProps> = ({
 
       {/* Catatan Penjelas di Bawah */}
       <p className="text-[11px] text-[#64748B] mt-3.5 pt-3 border-t border-[#F1F5F9] leading-relaxed">
-        Skor Akhir = <strong>0.60 × Y + 0.40 × X</strong> (Skala 0–120). Predikat: Sangat Baik (≥110), Baik (90–109.9), Cukup (70–89.9), Kurang (&lt;70).
+        Skor Akhir = <strong>0.55 × Y + 0.45 × X</strong> (Skala 0–120). Predikat: Sangat Baik (≥110), Baik (90–109.9), Cukup (70–89.9), Kurang (&lt;70).
       </p>
     </div>
   );
