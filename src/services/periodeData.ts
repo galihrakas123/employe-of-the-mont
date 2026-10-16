@@ -8,13 +8,17 @@
 // ============================================================================
 
 import {
+  AREA_GROUPS,
   AREA_WEIGHTS,
+  AreaKey,
+  KPI_DEFINITIONS,
   SUMBU_X_WEIGHT,
   SUMBU_Y_WEIGHT,
   Kategori,
   getBoxByCoordinates,
   getKategori,
   getPredikatBySkor,
+  hitungKpi,
   mockLeaderboardData,
 } from './dashboardMockData';
 
@@ -157,3 +161,49 @@ export const getEvaluasi = (unitId: string, periodeKey: string): EvaluasiPeriode
 
 // Riwayat penilaian unit per bulan (Januari s.d. bulan berjalan)
 export const getRiwayat = (unitId: string): EvaluasiPeriode[] => PERIODE_LIST.map((p) => getEvaluasi(unitId, p.key));
+
+// ----------------------------------------------------------------------------
+// CAPAIAN TIAP INDIKATOR KPI PER UNIT & PERIODE
+// Capaian contoh tiap KPI diskalakan dengan rasio skor area unit pada periode itu
+// terhadap skor area contoh, sehingga KPI satu area bergerak bersama skor areanya.
+// Dipakai tree penilaian di halaman detail dan ringkasan capaian KPI di dashboard.
+// ----------------------------------------------------------------------------
+
+const AREA_SKOR_KEY: Record<AreaKey, keyof AreaScores> = {
+  area_a: 'pendapatan',
+  area_b: 'kepatuhan',
+  area_c: 'pelayanan',
+  area_d: 'tataKelola',
+  area_e: 'sdm',
+};
+
+// Skor area dari capaian contoh: Σ(min(batas atas, capaian) × bobot) ÷ Σ bobot
+const SKOR_AREA_CONTOH = Object.fromEntries(
+  AREA_GROUPS.map((g) => {
+    const items = KPI_DEFINITIONS.filter((k) => k.area === g.id);
+    const bobot = items.reduce((acc, k) => acc + k.bobot, 0);
+    return [g.id, items.reduce((acc, k) => acc + Math.min(k.batasAtas, k.capaian) * k.bobot, 0) / bobot];
+  })
+) as Record<AreaKey, number>;
+
+// Indeks capaian (sebelum batas atas) tiap KPI, urut sesuai KPI_DEFINITIONS
+export const getIndeksKpi = (areas: AreaScores): number[] =>
+  KPI_DEFINITIONS.map((def) => {
+    const faktor = areas[AREA_SKOR_KEY[def.area]] / SKOR_AREA_CONTOH[def.area];
+    return def.capaian * Math.min(1.25, Math.max(0.45, faktor));
+  });
+
+const capaianCache = new Map<string, number[][]>();
+
+// Capaian tiap KPI (nilai ÷ target × 100, setelah pembulatan data mentah) seluruh 34 P3DW pada satu periode.
+// Baris mengikuti urutan getEvaluasiSemua, kolom mengikuti urutan KPI_DEFINITIONS.
+export function getCapaianKpiSemua(periodeKey: string): number[][] {
+  const periode = getPeriode(periodeKey);
+  const cached = capaianCache.get(periode.key);
+  if (cached) return cached;
+  const rows = getEvaluasiSemua(periode.key).map((e) =>
+    getIndeksKpi(e).map((indeks, i) => round1(hitungKpi(KPI_DEFINITIONS[i], indeks).skorMentah))
+  );
+  capaianCache.set(periode.key, rows);
+  return rows;
+}

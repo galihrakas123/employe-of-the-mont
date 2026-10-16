@@ -21,6 +21,7 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import NineBoxExplanationModal from '@/components/ui/NineBoxExplanationModal';
 import TalentBoxMatrix, { MatrixLegend } from '@/components/charts/TalentBoxMatrix';
 import { NINE_BOX_DETAILS } from '@/constants/nineBoxData';
+import CapaianIndikatorKpi from './widget/CapaianIndikatorKpi';
 
 const periodeOptions = [...PERIODE_LIST].reverse().map((p) => ({ label: p.label, value: p.key }));
 
@@ -679,6 +680,9 @@ export const BerandaDashboardPage: React.FC = () => {
         </div>
       </section>
       </div>
+
+      {/* 4–5. Rata-rata capaian tiap indikator KPI & trennya (34 P3DW atau satu P3DW) */}
+      <CapaianIndikatorKpi periode={periode} />
 
       {/* MODAL PENJELASAN TIAP BOX (KONDISI, MAKNA, TINDAK LANJUT) */}
       <NineBoxExplanationModal

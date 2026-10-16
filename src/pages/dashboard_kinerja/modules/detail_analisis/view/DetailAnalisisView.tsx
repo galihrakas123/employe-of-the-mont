@@ -166,7 +166,7 @@ export const DetailAnalisisView: React.FC = () => {
             <FocusAreaCard scoreSDM={evaluasi.sdm} bobot={15} />
 
             {/* 5. Tabel Rincian Evaluasi & Tren Penilaian (Sejajar lebarnya dengan card di atasnya) */}
-            <TrenPenilaianTable totalSkor={evaluasi.total} />
+            <TrenPenilaianTable totalSkor={evaluasi.total} areas={evaluasi} />
 
             {/* 6. Tree Penilaian versi 2 (KPI Kepala P3DW): tersembunyi, tampil lewat ketik "v2" atau ?v2=1 */}
             {showTreeV2 && (

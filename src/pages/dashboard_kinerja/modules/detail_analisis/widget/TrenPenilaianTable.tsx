@@ -11,12 +11,15 @@ import {
   hitungKpi,
   mockTrenPenilaianTotal,
 } from '@/services/dashboardMockData';
+import { AreaScores, getIndeksKpi } from '@/services/periodeData';
 
 // Tree penilaian: Skor Akhir → 2 sumbu → 5 area → 24 KPI.
 // Tombol i menampilkan rumus, sumber data, data mentah yang dipakai, dan rantai hitung nilai → skor → poin.
 
 interface TrenPenilaianTableProps {
   totalSkor?: number;
+  /** Skor area unit pada periode yang ditinjau; capaian KPI mengikuti skor areanya (sama dengan dashboard) */
+  areas?: AreaScores;
 }
 
 type SumbuKey = 'sumbu_y' | 'sumbu_x';
@@ -197,17 +200,21 @@ const summarize = (items: KpiResult[]): GroupResult => {
   return { bobot, poin, skor: (poin * 100) / bobot };
 };
 
-export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSkor = 95.8 }) => {
-  // Skala capaian contoh agar mengikuti skor akhir unit yang dibuka
+export const TrenPenilaianTable: React.FC<TrenPenilaianTableProps> = ({ totalSkor = 95.8, areas }) => {
+  // Skala capaian contoh: per area bila skor area diketahui, selain itu mengikuti skor akhir unit
   const factor = totalSkor ? Math.min(1.15, Math.max(0.45, totalSkor / mockTrenPenilaianTotal)) : 1;
+  const indeks = useMemo(
+    () => (areas ? getIndeksKpi(areas) : KPI_DEFINITIONS.map((def) => def.capaian * factor)),
+    [areas, factor]
+  );
 
   const kpis = useMemo<KpiResult[]>(
     () =>
-      KPI_DEFINITIONS.map((def) => {
-        const hasil = hitungKpi(def, def.capaian * factor);
+      KPI_DEFINITIONS.map((def, i) => {
+        const hasil = hitungKpi(def, indeks[i]);
         return { def, hasil, skor: hasil.skor, poin: (hasil.skor * def.bobot) / 100 };
       }),
-    [factor]
+    [indeks]
   );
 
   const allIds = ['sumbu_y', 'sumbu_x', ...AREA_GROUPS.map((a) => a.id)];

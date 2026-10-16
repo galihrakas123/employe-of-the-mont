@@ -12,5 +12,7 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    // Izinkan akses lewat tunnel (cloudflared quick tunnel / ngrok) untuk berbagi dev server
+    allowedHosts: ['.trycloudflare.com', '.ngrok-free.app'],
   },
 });
