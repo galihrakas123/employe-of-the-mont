@@ -89,7 +89,8 @@ export const useDetailAnalisisController = () => {
   }, []);
 
   const handleBack = () => {
-    navigate('/beranda');
+    // Kembali ke dashboard dengan periode yang sama
+    navigate(isPeriodeBerjalan ? '/beranda' : `/beranda?periode=${periode.key}`);
   };
 
   const getKategoriBadgeStyle = (kategori: string) => {

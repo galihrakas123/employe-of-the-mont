@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Activity,
   Star,
@@ -15,29 +15,92 @@ import {
   HelpCircle,
   X,
 } from 'lucide-react';
-import {
-  mockKpiTopCards,
-  mockScatterData,
-  mockLeaderboardData,
-  P3dwScatterData,
-  korwilMasterData,
-  KorwilGroupInfo,
-} from '@/services/dashboardMockData';
+import { mockLeaderboardData, P3dwLeaderboardData, P3dwScatterData } from '@/services/dashboardMockData';
+import { PERIODE_BERJALAN, PERIODE_LIST, getEvaluasiSemua, getPeriode } from '@/services/periodeData';
 import CustomSelect from '@/components/ui/CustomSelect';
 import NineBoxExplanationModal from '@/components/ui/NineBoxExplanationModal';
 import TalentBoxMatrix, { MatrixLegend } from '@/components/charts/TalentBoxMatrix';
 import { NINE_BOX_DETAILS } from '@/constants/nineBoxData';
 
+const periodeOptions = [...PERIODE_LIST].reverse().map((p) => ({ label: p.label, value: p.key }));
+
 export const BerandaDashboardPage: React.FC = () => {
   const navigate = useNavigate();
 
+  // Periode penilaian (disimpan di URL ?periode=YYYY-MM, sama seperti halaman detail); bawaan = bulan berjalan
+  const [searchParams, setSearchParams] = useSearchParams();
+  const periode = getPeriode(searchParams.get('periode'));
+  const isPeriodeBerjalan = periode.key === PERIODE_BERJALAN.key;
+  const setPeriode = (key: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === PERIODE_BERJALAN.key) next.delete('periode');
+    else next.set('periode', key);
+    setSearchParams(next, { replace: true });
+  };
+  const detailUrl = (id: string) =>
+    `/beranda/detail-analisis?id=${id}${isPeriodeBerjalan ? '' : `&periode=${periode.key}`}`;
+
+  // Penilaian 34 P3DW pada periode terpilih: titik matriks & baris leaderboard
+  const { scatterData, leaderboardData } = useMemo(() => {
+    const evaluasi = getEvaluasiSemua(periode.key);
+    const byId = new Map(evaluasi.map((e) => [e.id, e]));
+    const scatter: P3dwScatterData[] = evaluasi.map((e) => ({
+      id: e.id,
+      nama: e.nama,
+      x: e.x,
+      y: e.y,
+      box: e.boxLabel,
+      boxNumber: e.boxNumber,
+      kategori: e.kategori,
+      skorTotal: e.total,
+      korwil: e.korwil,
+      kinerjaLevel: e.kinerjaLevel,
+      potensiLevel: e.potensiLevel,
+    }));
+    const leaderboard: P3dwLeaderboardData[] = mockLeaderboardData
+      .map((u) => {
+        const e = byId.get(u.id)!;
+        return {
+          ...u,
+          peringkat: e.peringkat,
+          totalSkor: e.total,
+          predikat: e.predikat,
+          grade: e.grade,
+          scorePendapatan: e.pendapatan,
+          scoreKepatuhan: e.kepatuhan,
+          scorePelayanan: e.pelayanan,
+          scoreTataKelola: e.tataKelola,
+          scoreSdm: e.sdm,
+          skorY: e.y,
+          skorX: e.x,
+          boxNumber: e.boxNumber,
+          boxName: e.boxName,
+        };
+      })
+      .sort((a, b) => a.peringkat - b.peringkat);
+    return { scatterData: scatter, leaderboardData: leaderboard };
+  }, [periode.key]);
+
+  // Ringkasan kartu atas untuk periode terpilih
+  const ringkasan = useMemo(() => {
+    const n = scatterData.length || 1;
+    return {
+      rataSkor: (scatterData.reduce((acc, u) => acc + u.skorTotal, 0) / n).toFixed(1),
+      box9: scatterData.filter((u) => u.boxNumber === 9).length,
+      box1: scatterData.filter((u) => u.boxNumber === 1).length,
+      rataPendapatan: (leaderboardData.reduce((acc, u) => acc + u.scorePendapatan, 0) / n).toFixed(1),
+    };
+  }, [scatterData, leaderboardData]);
+
   // State
-  // Default tidak ada unit terpilih; klik ulang unit yang sama, tombol ✕, atau Esc untuk membatalkan pilihan
-  const [selectedUnit, setSelectedUnit] = useState<P3dwScatterData | null>(null);
+  // Default tidak ada unit terpilih; klik ulang unit yang sama, tombol ✕, atau Esc untuk membatalkan pilihan.
+  // Yang disimpan hanya id-nya, agar ringkasan unit ikut berganti saat periode diganti.
+  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
+  const selectedUnit = scatterData.find((s) => s.id === selectedUnitId) ?? null;
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedUnit(null);
+      if (e.key === 'Escape') setSelectedUnitId(null);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
@@ -55,12 +118,7 @@ export const BerandaDashboardPage: React.FC = () => {
 
   // Pilih unit tanpa mengubah filter tabel, agar daftar P3DW lain tetap tampil
   const handleSelectBranch = (unitId: string) => {
-    if (selectedUnit?.id === unitId) {
-      setSelectedUnit(null);
-      return;
-    }
-    const match = mockScatterData.find((s) => s.id === unitId);
-    if (match) setSelectedUnit(match);
+    setSelectedUnitId((prev) => (prev === unitId ? null : unitId));
   };
 
   // Options untuk CustomSelect (Matching Referensi Gambar)
@@ -81,7 +139,7 @@ export const BerandaDashboardPage: React.FC = () => {
   ];
 
   // Filtered Leaderboard
-  const filteredLeaderboard = mockLeaderboardData.filter((item) => {
+  const filteredLeaderboard = leaderboardData.filter((item) => {
     const matchKlaster = filterKlaster === 'ALL' || item.klaster === filterKlaster;
     const matchKorwil = filterKorwil === 'ALL' || item.kanwil === filterKorwil;
     const q = searchQuery.toLowerCase().trim();
@@ -95,7 +153,7 @@ export const BerandaDashboardPage: React.FC = () => {
 
   // Titik matriks yang tidak lolos filter diredupkan
   const filteredIds = new Set(filteredLeaderboard.map((item) => item.id));
-  const dimmedUnitIds = new Set(mockScatterData.filter((item) => !filteredIds.has(item.id)).map((item) => item.id));
+  const dimmedUnitIds = new Set(scatterData.filter((item) => !filteredIds.has(item.id)).map((item) => item.id));
 
   // Tampilkan semua data; tabel di-scroll di dalam kartunya sendiri
   const displayedLeaderboard = filteredLeaderboard;
@@ -164,7 +222,7 @@ export const BerandaDashboardPage: React.FC = () => {
   return (
     <div className="flex flex-col gap-6 w-full p-4 sm:p-6 lg:p-7 pb-10 font-roboto antialiased text-[#212121]">
       {/* 0. PAGE TITLE (Sesuai Dokumen Talent Box KPI Kepala Pusat Cabang Samsat) */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
         <div>
           <h1 className="text-[26px] font-semibold text-[#212121] tracking-tight leading-tight">
             Dashboard Kinerja Strategis
@@ -173,7 +231,35 @@ export const BerandaDashboardPage: React.FC = () => {
             Sistem Informasi Evaluasi Kinerja Strategis & Pemetaan Potensial P3DW Bapenda Jawa Barat
           </p>
         </div>
+        {/* Pilih periode penilaian yang ingin ditinjau (sama seperti di halaman detail) */}
+        <div className="shrink-0">
+          <div className="text-[10px] text-[#757575] font-semibold uppercase tracking-wider mb-1">Periode Penilaian</div>
+          <CustomSelect
+            compact
+            placeholder="Periode penilaian"
+            value={periode.key}
+            options={periodeOptions}
+            onChange={setPeriode}
+            className="w-44"
+          />
+        </div>
       </div>
+
+      {/* Penanda saat meninjau periode lampau */}
+      {!isPeriodeBerjalan && (
+        <div className="-mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#F59E0B]/40 bg-[#FFFBEB] dark:bg-[#78350F]/20 px-4 py-2.5 text-[12.5px] text-[#92400E] dark:text-[#FBBF24]">
+          <span>
+            Menampilkan penilaian <b>{periode.label}</b>. Peringkat, posisi matriks, dan skor mengikuti periode tersebut.
+          </span>
+          <button
+            type="button"
+            onClick={() => setPeriode(PERIODE_BERJALAN.key)}
+            className="font-semibold underline underline-offset-2 hover:no-underline cursor-pointer"
+          >
+            Kembali ke {PERIODE_BERJALAN.label}
+          </button>
+        </div>
+      )}
 
       {/* 1. TOP KPI CARDS (Agregasi 34 Cabang P3DW Berdasarkan Standar Baku) */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -191,7 +277,7 @@ export const BerandaDashboardPage: React.FC = () => {
           <div className="my-2">
             <div className="flex items-baseline gap-1">
               <span className="text-[32px] font-black text-white leading-none tracking-tight font-roboto">
-                {mockKpiTopCards[0].value}
+                {ringkasan.rataSkor.replace('.', ',')}
               </span>
               <span className="text-[14px] font-semibold text-white/80">/ 120</span>
             </div>
@@ -217,7 +303,7 @@ export const BerandaDashboardPage: React.FC = () => {
           <div className="my-2">
             <div className="flex items-baseline gap-1.5">
               <span className="text-[32px] font-black text-[#0F172A] leading-none tracking-tight font-roboto">
-                {mockKpiTopCards[1].value}
+                {ringkasan.box9}
               </span>
               <span className="text-[13px] font-semibold text-[#64748B]">P3DW</span>
             </div>
@@ -241,12 +327,12 @@ export const BerandaDashboardPage: React.FC = () => {
 
           <div className="my-2">
             <span className="text-[32px] font-black text-[#0F172A] leading-none tracking-tight font-roboto">
-              {mockKpiTopCards[2].value}
+              {ringkasan.rataPendapatan.replace('.', ',')}%
             </span>
           </div>
 
           <div className="text-[11px] font-medium text-[#64748B]">
-            Rata-rata 34 P3DW s.d. Oktober
+            Rata-rata 34 P3DW · {periode.label}
           </div>
         </div>
 
@@ -264,7 +350,7 @@ export const BerandaDashboardPage: React.FC = () => {
           <div className="my-2">
             <div className="flex items-baseline gap-1.5">
               <span className="text-[32px] font-black text-[#E53935] leading-none tracking-tight font-roboto">
-                {mockKpiTopCards[3].value}
+                {ringkasan.box1}
               </span>
               <span className="text-[13px] font-semibold text-[#E53935]/80">P3DW</span>
             </div>
@@ -308,7 +394,7 @@ export const BerandaDashboardPage: React.FC = () => {
               selectedId={selectedUnit?.id}
               onSelect={handleSelectBranch}
               onBoxClick={handleOpenBoxExplanation}
-              points={mockScatterData.map((item) => ({
+              points={scatterData.map((item) => ({
                 id: item.id,
                 label: item.nama,
                 x: item.x,
@@ -345,7 +431,7 @@ export const BerandaDashboardPage: React.FC = () => {
                   </span>
                   <button
                     type="button"
-                    onClick={() => setSelectedUnit(null)}
+                    onClick={() => setSelectedUnitId(null)}
                     className="w-6 h-6 rounded-full flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0] dark:hover:bg-[#334155] transition cursor-pointer"
                     title="Batalkan pilihan (Esc)"
                     aria-label="Batalkan pilihan unit"
@@ -390,7 +476,7 @@ export const BerandaDashboardPage: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => navigate(`/beranda/detail-analisis?id=${selectedUnit.id}`)}
+                  onClick={() => navigate(detailUrl(selectedUnit.id))}
                   className="ml-auto inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#00875A] hover:bg-[#00724C] text-white rounded-[10px] text-[13px] font-medium transition shadow-sm whitespace-nowrap cursor-pointer"
                 >
                   <span>Lihat Detail</span>
@@ -570,7 +656,7 @@ export const BerandaDashboardPage: React.FC = () => {
                         />
                         <button
                           type="button"
-                          onClick={() => navigate(`/beranda/detail-analisis?id=${row.id}`)}
+                          onClick={() => navigate(detailUrl(row.id))}
                           className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00875A] hover:bg-[#00724C] text-white text-[12px] font-medium transition cursor-pointer shadow-xs active:scale-95"
                         >
                           <span>Detail</span>

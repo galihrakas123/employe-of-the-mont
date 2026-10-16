@@ -1,11 +1,15 @@
 import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Calendar, Menu } from 'lucide-react';
+import { getPeriode } from '@/services/periodeData';
 import { useSidebar } from '../SidebarContext';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import avatarImg from '@/assets/avatar.png';
 
 export const Header: React.FC = () => {
   const { togglePin, isPinned } = useSidebar();
+  const [searchParams] = useSearchParams();
+  const periode = getPeriode(searchParams.get('periode'));
 
   return (
     <header className="h-16 bg-white border-b border-[#E0E0E0] flex items-center justify-between px-6 sticky top-0 z-40 select-none font-roboto">
@@ -29,7 +33,7 @@ export const Header: React.FC = () => {
         <div className="hidden sm:flex items-center gap-2 bg-[#F5F5F5] border border-[#E0E0E0] rounded-lg px-3.5 py-1.5 text-[12px] text-[#424242] font-medium">
           <Calendar size={14} className="text-[#00875A]" />
           <span>
-            Periode: <strong className="text-[#212121] font-semibold">Oktober 2026</strong>
+            Periode: <strong className="text-[#212121] font-semibold">{periode.label}</strong>
           </span>
         </div>
 
